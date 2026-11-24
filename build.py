@@ -11,12 +11,15 @@ Usage:
     ./build.py                 # all bins
     ./build.py aa_fit          # just these
     ./build.py --no-png        # skip previews
-    OPENSCAD=/path/to/openscad ./build.py
+    OPENSCAD=/path/to/openscad ./build.py   # only if auto-detect fails
 
+Finds OpenSCAD on PATH or as /Applications/OpenSCAD*.app (newest wins).
 Needs an OpenSCAD development snapshot (2025+, Manifold backend);
 the 2021.01 release cannot parse gridfinity-rebuilt-openscad.
 """
 import argparse
+import glob
+import shutil
 import os
 import re
 import subprocess
@@ -26,7 +29,25 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent
 ENTRY = ROOT / "bin.scad"
 OUT = ROOT / "build"
-OPENSCAD = os.environ.get("OPENSCAD", "openscad")
+
+
+def find_openscad():
+    """$OPENSCAD, else `openscad` on PATH, else the newest OpenSCAD*.app
+    in /Applications or ~/Applications (macOS)."""
+    if os.environ.get("OPENSCAD"):
+        return os.environ["OPENSCAD"]
+    if shutil.which("openscad"):
+        return "openscad"
+    apps = []
+    for d in ("/Applications", os.path.expanduser("~/Applications")):
+        apps += glob.glob(os.path.join(d, "OpenSCAD*.app/Contents/MacOS/OpenSCAD"))
+    if apps:
+        return max(apps, key=os.path.getmtime)
+    sys.exit("OpenSCAD not found. Install a development snapshot, or set\n"
+             "OPENSCAD=/path/to/openscad")
+
+
+OPENSCAD = find_openscad()
 _seen = set()
 
 # camera: translate x,y,z, rotate x,y,z, distance
@@ -74,6 +95,7 @@ def build(bin_id, png=True):
 
 
 def main():
+    print(f"using {OPENSCAD}")
     ap = argparse.ArgumentParser()
     ap.add_argument("bins", nargs="*")
     ap.add_argument("--no-png", action="store_true")
