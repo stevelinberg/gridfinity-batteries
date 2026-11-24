@@ -177,11 +177,14 @@ module _pocket_cuts(id) {
                 translate([-nt[0] / 2, -sz.y / 2 - nt[1], zt - depth - nt[2]])
                     cube([nt[0], nt[1] + sz.y / 2, depth + nt[2] + 1]);
             // finger channels at both x-ends: grip the cell by its rims
+            // (never deeper than 75 % of the slot, so small cells can't
+            // slide out sideways under the channel)
             cw = P(id, "channel");
+            cd = min(cw[1], 0.75 * depth);
             if (cw[0] > 0)
                 for (m = [0, 1]) mirror([m, 0, 0])
-                    translate([sz.x / 2 - EPS, -g_pitch(id, g).y / 2 - EPS, zt - cw[1]])
-                        cube([cw[0], g_pitch(id, g).y + 2 * EPS, cw[1] + 1]);
+                    translate([sz.x / 2 - EPS, -g_pitch(id, g).y / 2 - EPS, zt - cd])
+                        cube([cw[0], g_pitch(id, g).y + 2 * EPS, cd + 1]);
         }
     }
 }

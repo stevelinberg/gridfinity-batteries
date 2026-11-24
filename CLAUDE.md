@@ -136,7 +136,7 @@ Medium, Condensed Medium, Condensed ExtraBold. Override for one build with
 | `9v` ×2 | 2x1 | 4 9V each | upright, snaps up |
 | `npbx1` | 2x1 | 6 NP-BX1 | upright, +2.8 mm finger spacing |
 | `coin` | **3x1** | 14 CR2032 + 10 CR2016 | slots on edge, all 12 mm held / 8 showing; 10.8 mm finger `channel`s, 7 deep, at both ends of each column, so coins are gripped by their rims |
-| `button` | 2x2 | 16 AG13/LR44 + 12 AG3 | flat, square grid + `space` [1,3]; fingernail `notch` at each pocket's front, 0.8 below the floor (floor 1.6 here) |
+| `button` | 2x2 | 22 AG13/LR44 + 15 AG3 | **on edge in slots like the coins** (flat pockets with notches were rejected: notches unreachable past the first row). Half held; rim-grip channels, depth capped at 75 % of the slot |
 | `recharge` | 2x2 | loose | scoop tray, "Recharge" + icon |
 
 ## Next steps
@@ -144,8 +144,8 @@ Medium, Condensed Medium, Condensed ExtraBold. Override for one build with
 1. Grip redesign done (Steve OK'd it 2026-11-24). **Print `coin` and
    `button` first** as a quick test, then the rest. Steve renders on his
    Mac (Futura). Then get
-   feedback: coin-slot and button-pocket fit, whether flat buttons can be
-   picked out (may need a fingernail notch), 0.8 tube stiffness.
+   feedback: coin/button slot fit and rim grip, 0.8 tube stiffness.
+   (`notch` is still available but unused.)
 2. Steve commits a Bambu project 3MF per bin under `bambu/`.
 3. Layout options now in place: `stagger`, `raise`, `space`, `notch`,
    `channel` (bin-level keys, see `BIN_DEFAULTS`). CR1620: Steve has only one, so no bin for

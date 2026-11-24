@@ -59,9 +59,9 @@ CELLS = [
     // coins stand on edge in slots: footprint = diameter x thickness
     ["CR2032", [["shape", "rect"], ["fp", [20, 3.12]], ["l", 20]]],
     ["CR2016", [["shape", "rect"], ["fp", [20, 1.65]], ["l", 20]]],
-    // button cells lie flat in shallow pockets
-    ["AG13",   [["d", 11.44], ["l", 5.16]]],   // = LR44
-    ["AG3",    [["d", 7.82],  ["l", 3.51]]],   // = LR41
+    // button cells also stand on edge in slots, like coins
+    ["AG13",   [["shape", "rect"], ["fp", [11.44, 5.16]], ["l", 11.44]]],  // = LR44
+    ["AG3",    [["shape", "rect"], ["fp", [7.82, 3.51]],  ["l", 7.82]]],   // = LR41
 ];
 
 // ---------- Bins ----------
@@ -123,16 +123,15 @@ BINS = [
         ]],
     ]],
 
-    // Button cells flat in shallow pockets, each with a fingernail notch
-    // at the front that dips 0.8 mm below the pocket floor.
-    // 16 x AG13 + 12 x AG3.
+    // Button cells on edge in slots, same rim-grip idea as the coin bin:
+    // half held, half showing; finger channels at both ends of each column
+    // (depth capped at 75 % of the slot). 22 x AG13 + 15 x AG3.
     ["button", [
-        ["grid", [2, 2]], ["strip", 6], ["hold", 0.7],
-        ["floor", 1.6],            // notch dips into it; keep 0.8 above the feet
-        ["space", [1, 3]], ["notch", [4, 2.6, 0.8]],
+        ["grid", [2, 2]], ["strip", 6], ["hold", 0.5],
+        ["space", [10, 0]], ["channel", [10.8, 7]],
         ["groups", [
-            ["AG13", 4, 4, "AG13 / LR44", 0.4],
-            ["AG3",  2, 6, "AG3",  0.4],
+            ["AG13", 2, 11, "AG13 / LR44", 0.4],
+            ["AG3",  1, 15, "AG3",  0.4],
         ]],
     ]],
 
