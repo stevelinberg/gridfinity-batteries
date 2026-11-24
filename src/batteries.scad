@@ -34,7 +34,11 @@ BIN_DEFAULTS = [
     ["chamfer",     0.8],
     ["space",       [0, 0]],   // extra gap between pockets [x, y]
     ["stagger",     false],    // hex-offset odd rows (round cells)
-    ["raise",       0],        // raise odd rows' floors by this much (mm)      // lead-in chamfer at the top of each hole
+    ["raise",       0],        // raise odd rows' floors by this much (mm)
+    ["notch",       [0, 0, 0]],// fingernail notch at each pocket's front:
+                               //   [width, reach past pocket, below floor]
+    ["channel",     [0, 0]],   // finger channels at both x-ends of each
+                               //   pocket: [width, depth from top]      // lead-in chamfer at the top of each hole
     ["strip",       9],        // front label strip depth (y), 0 = none
     ["deck",        1.6],      // label strip top plate (hollow below)
     ["text_size",   5],        // main label font size (mm)
@@ -76,17 +80,18 @@ BINS = [
         ["strip", 12], ["rib", 1.2],
     ]],
 
-    // 2 rows of 5. Print two for 20 cells.
+    // 2 rows of 5. Print two for 20 cells. Back row stands 10 mm
+    // higher (15 mm held), so it can be pinched front-to-back.
     ["aa", [
         ["cell", "AA"], ["grid", [2, 1]],
-        ["rows", 2], ["cols", 5],
+        ["rows", 2], ["cols", 5], ["raise", 10],
         ["strip", 6], ["label", "AA"],
     ]],
 
-    // 3 staggered rows of 6.
+    // 3 staggered rows of 6; the middle row stands 8 mm higher.
     ["aaa", [
         ["cell", "AAA"], ["grid", [2, 1]],
-        ["rows", 3], ["cols", 6], ["stagger", true],
+        ["rows", 3], ["cols", 6], ["stagger", true], ["raise", 8],
         ["strip", 6], ["label", "AAA"],
     ]],
 
@@ -104,26 +109,30 @@ BINS = [
         ["strip", 6], ["label", "NP-BX1"],
     ]],
 
-    // Coin cells on edge in slots: 14 x CR2032, 10 x CR2016.
-    // Slots get a little extra clearance (narrow slots print tight).
-    // Every other slot is 8 mm shallower, so coins stand at alternating
-    // heights (low: 13 deep / 7 exposed, high: 5 deep / 15 exposed).
+    // Coin cells on edge in slots, all the same height: 12 mm held
+    // (60 %), 8 mm showing. 10 mm finger channels at both ends of every
+    // slot column, 7 mm deep, so a coin is pinched by its rims.
+    // 14 x CR2032 + 10 x CR2016. Slots get 0.5 clearance (narrow slots
+    // print tight).
     ["coin", [
-        ["grid", [2, 1]], ["strip", 6],
-        ["hold", 0.65], ["raise", 8],
+        ["grid", [3, 1]], ["strip", 6],
+        ["hold", 0.6], ["space", [10, 0]], ["channel", [10.8, 7]],
         ["groups", [
             ["CR2032", 2, 7,  "CR2032", 0.5],
             ["CR2016", 1, 10, "CR2016", 0.5],
         ]],
     ]],
 
-    // Button cells flat in shallow staggered pockets:
-    // 24 x AG13, 18 x AG3.
+    // Button cells flat in shallow pockets, each with a fingernail notch
+    // at the front that dips 0.8 mm below the pocket floor.
+    // 16 x AG13 + 12 x AG3.
     ["button", [
-        ["grid", [2, 2]], ["strip", 6], ["hold", 0.7], ["stagger", true],
+        ["grid", [2, 2]], ["strip", 6], ["hold", 0.7],
+        ["floor", 1.6],            // notch dips into it; keep 0.8 above the feet
+        ["space", [1, 3]], ["notch", [4, 2.6, 0.8]],
         ["groups", [
-            ["AG13", 4, 6, "AG13 / LR44", 0.4],
-            ["AG3",  2, 9, "AG3",  0.4],
+            ["AG13", 4, 4, "AG13 / LR44", 0.4],
+            ["AG3",  2, 6, "AG3",  0.4],
         ]],
     ]],
 

@@ -131,32 +131,23 @@ Medium, Condensed Medium, Condensed ExtraBold. Override for one build with
 
 | bin | grid | holds | notes |
 |---|---|---|---|
-| `aa` ×2 | 2x1 | 10 AA each | 5x2 |
-| `aaa` | 2x1 | 18 AAA | 3 staggered rows of 6 |
+| `aa` ×2 | 2x1 | 10 AA each | 5x2; back row `raise` 10 (15 mm held) for pinching |
+| `aaa` | 2x1 | 18 AAA | 3 staggered rows of 6; middle row `raise` 8 |
 | `9v` ×2 | 2x1 | 4 9V each | upright, snaps up |
 | `npbx1` | 2x1 | 6 NP-BX1 | upright, +2.8 mm finger spacing |
-| `coin` | 2x1 | 14 CR2032 + 10 CR2016 | slots on edge; alternate slots 13 / 5 mm deep (`raise` 8) so every coin can be pinched |
-| `button` | 2x2 | 24 AG13/LR44 + 18 AG3 | flat, staggered, 70 % deep |
+| `coin` | **3x1** | 14 CR2032 + 10 CR2016 | slots on edge, all 12 mm held / 8 showing; 10.8 mm finger `channel`s, 7 deep, at both ends of each column, so coins are gripped by their rims |
+| `button` | 2x2 | 16 AG13/LR44 + 12 AG3 | flat, square grid + `space` [1,3]; fingernail `notch` at each pocket's front, 0.8 below the floor (floor 1.6 here) |
 | `recharge` | 2x2 | loose | scoop tray, "Recharge" + icon |
 
 ## Next steps
 
-0. **Open design question (2026-11-24): grip.** Steve worries the cells
-   are hard to get out (tight packing) and the raised coins unstable
-   (5 mm hold). Proposed, awaiting his OK:
-   - AA/AAA: `raise` the odd rows (AA back row +10, AAA middle row +8),
-     same bin height, so the raised row can be pinched front-to-back.
-   - Coins: drop alternating heights. All coins held 12 mm (60 %), and
-     ~10 mm finger channels at both ends of each slot column, so coins are
-     pinched by their rims. 3x1: 14 CR2032 + 11 CR2016.
-   - Buttons: a fingernail notch per pocket, plus spacing. 2x2,
-     ~16 AG13 + ~12 AG3.
-   - Print coin + button first, as a quick test.
-1. Steve renders on his Mac (Futura) and prints the batch. Then get
+1. Grip redesign done (Steve OK'd it 2026-11-24). **Print `coin` and
+   `button` first** as a quick test, then the rest. Steve renders on his
+   Mac (Futura). Then get
    feedback: coin-slot and button-pocket fit, whether flat buttons can be
    picked out (may need a fingernail notch), 0.8 tube stiffness.
 2. Steve commits a Bambu project 3MF per bin under `bambu/`.
-3. Layout options now in place: `stagger`, `raise`, `space` (bin-level
-   keys, see `BIN_DEFAULTS`). CR1620: Steve has only one, so no bin for
+3. Layout options now in place: `stagger`, `raise`, `space`, `notch`,
+   `channel` (bin-level keys, see `BIN_DEFAULTS`). CR1620: Steve has only one, so no bin for
    now. Still to do: AAAA, A23.
 4. Later: charger/tester cradles; GitHub Releases upload; Spellbook note.

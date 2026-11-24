@@ -170,6 +170,18 @@ module _pocket_cuts(id) {
                 translate([0, 0, zt - c]) linear_extrude(EPS) pocket2d(id, g);
                 translate([0, 0, zt]) linear_extrude(EPS) pocket2d(id, g, c);
             }
+            sz = g_pocket(id, g);
+            // fingernail notch on the front side, a little below the floor
+            nt = P(id, "notch");
+            if (nt[0] > 0)
+                translate([-nt[0] / 2, -sz.y / 2 - nt[1], zt - depth - nt[2]])
+                    cube([nt[0], nt[1] + sz.y / 2, depth + nt[2] + 1]);
+            // finger channels at both x-ends: grip the cell by its rims
+            cw = P(id, "channel");
+            if (cw[0] > 0)
+                for (m = [0, 1]) mirror([m, 0, 0])
+                    translate([sz.x / 2 - EPS, -g_pitch(id, g).y / 2 - EPS, zt - cw[1]])
+                        cube([cw[0], g_pitch(id, g).y + 2 * EPS, cw[1] + 1]);
         }
     }
 }
