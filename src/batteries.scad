@@ -30,57 +30,100 @@ BIN_DEFAULTS = [
     ["magnets",     false],    // 6x2 mm magnet holes in the base corners
     ["floor",       1.2],      // floor plate on top of the base, mm
     ["wall",        1.2],      // outer wall thickness
-    ["rib",         1.2],      // thickness of tubes / ribs between cells
+    ["rib",         0.8],      // tubes / ribs between cells (2 lines @ 0.4)
     ["chamfer",     0.8],      // lead-in chamfer at the top of each hole
     ["strip",       9],        // front label strip depth (y), 0 = none
     ["deck",        1.6],      // label strip top plate (hollow below)
     ["text_size",   5],        // main label font size (mm)
     ["text_h",      0.6],      // raised text height (3 layers @ 0.2)
-    ["col_text_size", 3.5],    // per-column labels (fit tests)
+    ["col_text_size", 3.5],    // per-group labels
 ];
 
 // ---------- Cells ----------
-// d = max diameter, l = max length (incl. button top).
-// "src" records where the number came from: "nominal" until measured.
+// shape "round": d = max diameter.  shape "rect": fp = [x, y] footprint
+// as placed in the bin.  l = height as the cell sits in its pocket
+// (length for upright cells, diameter for coins on edge, thickness for
+// flat button cells).  Measured 2026-11-24 with calipers, largest cell.
 CELLS = [
-    ["AA",  [["d", 14.35], ["l", 50.32], ["src", "caliper 2026-11-24, largest of Steve's cells (mostly NiMH)"]]],
-    ["AAA", [["d", 10.5], ["l", 44.5], ["src", "nominal IEC LR03 max — REPLACE WITH CALIPER"]]],
+    ["AA",     [["d", 14.35], ["l", 50.32]]],  // mostly NiMH
+    ["AAA",    [["d", 10.4],  ["l", 44.25]]],
+    ["9V",     [["shape", "rect"], ["fp", [17.2, 25.9]], ["l", 47.5]]],
+    ["NPBX1",  [["shape", "rect"], ["fp", [9.45, 29.4]], ["l", 42.9]]],
+    // coins stand on edge in slots: footprint = diameter x thickness
+    ["CR2032", [["shape", "rect"], ["fp", [20, 3.12]], ["l", 20]]],
+    ["CR2016", [["shape", "rect"], ["fp", [20, 1.65]], ["l", 20]]],
+    // button cells lie flat in shallow pockets
+    ["AG13",   [["d", 11.44], ["l", 5.16]]],   // = LR44
+    ["AG3",    [["d", 7.82],  ["l", 3.51]]],   // = LR41
 ];
 
 // ---------- Bins ----------
-// grid:  gridfinity units [x, y]
-// rows, cols: hole matrix
-// label: main raised label; col_labels: optional per-column labels
+// grid: gridfinity units [x, y].
+// Uniform layout: cell + cols + rows.  Mixed layout: "groups", a list of
+//   [cell, cols, rows, label, clearance]  placed left to right; label and
+//   clearance are optional.  label: main raised label in the front strip.
 BINS = [
-    // Clearance ladder: 4 holes, 4 clearances, labeled. Print this first,
-    // pick the clearance that feels right, then set BIN_DEFAULTS.clearance.
+    // Clearance ladder (printed 2026-11-24: 0.3 won).
     ["aa_fit", [
         ["cell", "AA"], ["grid", [2, 1]],
         ["rows", 1], ["cols", 4],
         ["clearance", [0.3, 0.5, 0.7, 0.9]],
         ["label", "AA"],
         ["col_labels", ["0.3", "0.5", "0.7", "0.9"]],
-        ["strip", 12],
+        ["strip", 12], ["rib", 1.2],
     ]],
 
-    // Production AA bin: 2 rows of 5. Print two for 20 cells.
+    // 2 rows of 5. Print two for 20 cells.
     ["aa", [
         ["cell", "AA"], ["grid", [2, 1]],
         ["rows", 2], ["cols", 5],
         ["strip", 6], ["label", "AA"],
     ]],
 
-    // AAA: 2 rows of 6. NOMINAL cell size until measured.
+    // 2 rows of 6.
     ["aaa", [
         ["cell", "AAA"], ["grid", [2, 1]],
         ["rows", 2], ["cols", 6],
         ["strip", 6], ["label", "AAA"],
     ]],
 
-    // Loose cells waiting for the charger: open bin, scoop front,
-    // label ledge at the back (45° underside, no supports).
+    // 4 upright, snaps up. Print two for 8.
+    ["9v", [
+        ["cell", "9V"], ["grid", [2, 1]],
+        ["rows", 1], ["cols", 4],
+        ["strip", 10], ["label", "9V"], ["text_size", 6],
+    ]],
+
+    // Sony NP-BX1, 7 upright (contacts up).
+    ["npbx1", [
+        ["cell", "NPBX1"], ["grid", [2, 1]],
+        ["rows", 1], ["cols", 7],
+        ["strip", 6], ["label", "NP-BX1"],
+    ]],
+
+    // Coin cells on edge in slots: 14 x CR2032, 10 x CR2016.
+    // Slots get a little extra clearance (narrow slots print tight).
+    ["coin", [
+        ["grid", [2, 1]], ["strip", 6],
+        ["groups", [
+            ["CR2032", 2, 7,  "CR2032", 0.5],
+            ["CR2016", 1, 10, "CR2016", 0.5],
+        ]],
+    ]],
+
+    // Button cells flat in shallow pockets: 8 x AG13, 9 x AG3.
+    ["button", [
+        ["grid", [2, 1]], ["strip", 6], ["hold", 0.7],
+        ["groups", [
+            ["AG13", 4, 2, "AG13 / LR44", 0.4],
+            ["AG3",  3, 3, "AG3",  0.4],
+        ]],
+    ]],
+
+    // Loose cells waiting for the charger (also NP-BX1s): open tray,
+    // scoop front, label ledge at the back (45° underside, no supports).
     ["recharge", [
-        ["type", "scoop"], ["grid", [2, 1]],
+        ["type", "scoop"], ["grid", [2, 2]],
         ["height", 33.4],          // total height, matches the AA bin
         ["scoop_r", 16],
         ["ledge", 10],             // label ledge depth at the back

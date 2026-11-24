@@ -65,13 +65,23 @@ We use only its public-ish modules (`gridfinity_base_lite`,
 `gridfinityBase`, `bundle_hole_options`, `rounded_square`, constants), so
 an upgrade that breaks the build shows up right away.
 
-### Bin geometry (upright cells, `src/battery_bin.scad`)
-Lite gridfinity base (hollow feet), then a 1.2 mm floor plate bridging the
-feet, then an outer wall, a thin tube around each cell, and tie ribs through
-each row and column. A hollow label strip at the front has a 1.6 mm deck
-that carries the text. Height = base 7 + floor + `hold` × cell length (0.5,
-so cells stand half exposed). There's no stacking lip yet: the cells stick
-up, so nothing can stack on these anyway (open question below).
+### Bin geometry (`src/battery_bin.scad`)
+**cells bins** (default): pockets laid out in **column groups**
+(`groups` = list of `[cell, cols, rows, label, clearance]`, placed left
+to right; `cell/cols/rows` shorthand for uniform bins). A cell is
+`round` (d) or `rect` (fp = [x, y] as placed), standing `l` tall. An
+upright AA, a coin on edge (fp [d, thickness], l = d) and a flat button
+cell (d, l = thickness) are all just cells. Each pocket is `hold × l`
+deep. The bin top sits at the deepest pocket, and shallower pockets have
+solid plugs under them. Structure: lite gridfinity base (hollow feet),
+then a 1.2 mm floor plate bridging the feet, then a 1.2 mm outer wall, a
+0.8 mm tube around each pocket, and tie ribs (front-to-back per column,
+across per row within its group). A hollow label strip at the front has a
+1.6 mm deck carrying the group labels and/or the main label.
+**scoop bins** (`type: "scoop"`): open tray, quarter-round scoop at the
+front, 10 mm label ledge at the back with a 45° underside, and a
+hand-drawn battery+bolt icon (`icon_recharge`).
+No stacking lip: the cells stick up, so nothing can stack anyway.
 
 ## Label font
 
@@ -103,37 +113,38 @@ Medium, Condensed Medium, Condensed ExtraBold. Override for one build with
 
 ## Status (2026-11-24)
 
-- Repo scaffolded; submodule pinned at upstream `910e22d` (2025-08-31).
-- AA **measured**: d 14.35, l 50.32. Other cells still nominal.
+- Submodule pinned at upstream `910e22d`.
+- All of Steve's current cells are **measured** (see `CELLS`).
 - Steve: **no magnets**, 0.4 nozzle, 0.2 layers, prints on the P2S.
-- `aa_fit` printed fine with Futura labels. **Clearance 0.3** chosen and
-  set as the default.
-- Purge tower mystery: Bambu's slice preview shows **no** tower, and
-  prime tower is off in the project. The ~1 mm stub on the plate is most
-  likely the printer's start routine (purge/flow calibration), not the
-  model. Low priority.
-- Steve's Bambu project for `aa_fit` is committed locally on his Mac, but
-  the push failed: the clone used an HTTPS remote. Fix: switch the remote
-  to SSH (`git@github.com:...`), then `git pull --rebase`.
-- **New bins (previews made, not printed):**
-  - `aa`: 2x1, 2 rows of 5 (10 cells), 6 mm label strip. Steve will
-    print **two** of them.
-  - `aaa`: 2x1, 2 rows of 6. **Nominal dims**, waiting on calipers.
-  - `recharge`: 2x1 open tray (`type: "scoop"`), scoop fillet at the
-    front, 10 mm label ledge at the back with a 45° underside, raised
-    "Recharge" text and a hand-drawn battery+bolt icon (`icon_recharge`).
-- Wall/rib study (mesh volume): `aa` 32.2 cm³ at 1.2/1.2 vs 24.9 cm³ at
-  0.8/0.8 (−23%, ~9 g). `recharge`: 25.5 → 23.2 cm³ (small saving). Steve
-  says 1.2 feels sturdy but flexes slightly. Waiting on his decision.
+- `aa_fit` printed fine with Futura labels. **Clearance 0.3** is the
+  default. Coins and buttons use 0.5 / 0.4 in their groups (narrow slots
+  and small pockets print tight). These are untested.
+- Steve chose **0.8 mm tubes/ribs**, keeping the **1.2 mm outer wall**.
+  These are now the defaults; `aa_fit` keeps 1.2.
+- Purge-tower stub: `bambu/aa_fit.3mf` has prime tower off, but defines
+  `wrapping_exclude_area` 153–216 × 235–256 (back centre), exactly where
+  the stub printed. So it's the printer's start routine (clumping/wrap
+  detection pad), not the model. Closed.
+- Git: Steve now pushes over SSH, which works.
+- **Designed, not yet printed** (batch planned; ~223 cm³ mesh volume ≈
+  ≤ 276 g PLA for the whole batch):
+
+| bin | grid | holds | notes |
+|---|---|---|---|
+| `aa` ×2 | 2x1 | 10 AA each | 5x2 |
+| `aaa` | 2x1 | 12 AAA | 6x2. Staggered rows (not built) would give 17 |
+| `9v` ×2 | 2x1 | 4 9V each | upright, snaps up |
+| `npbx1` | 2x1 | 7 NP-BX1 | upright |
+| `coin` | 2x1 | 14 CR2032 + 10 CR2016 | slots on edge, 10 mm deep |
+| `button` | 2x1 | 8 AG13/LR44 + 9 AG3 | flat pockets, 70 % deep |
+| `recharge` | 2x2 | loose | scoop tray, "Recharge" + icon |
 
 ## Next steps
 
-1. Steve's answers: 0.8 ribs (keep 1.2 outer wall?); AAA measurements;
-   9V and button-cell measurements and counts.
-2. Build `9v` (rectangular pockets: add `shape: "rect"`) and the button
-   cell bin (shallow pockets, labeled rows), then a batch print:
-   2× aa, aaa, recharge, 9v, buttons.
-3. Then: AAAA, A23, coin cells (vertical slots), NP-BX1.
-4. Open question: stacking lip on/off.
-5. Set up GitHub Releases upload for rendered STLs.
-6. Later: write the project note in Spellbook.
+1. Steve renders on his Mac (Futura) and prints the batch. Then get
+   feedback: coin-slot and button-pocket fit, whether flat buttons can be
+   picked out (may need a fingernail notch), 0.8 tube stiffness.
+2. Steve commits a Bambu project 3MF per bin under `bambu/`.
+3. Possible: staggered (hex) rows (`aaa` → 17); more AG13 (2x2 button bin
+   → 20 AG13 + 24 AG3); CR1620 (needs measuring); AAAA, A23.
+4. Later: charger/tester cradles; GitHub Releases upload; Spellbook note.

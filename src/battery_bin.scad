@@ -1,14 +1,20 @@
 // ===================================================================
-// battery_bin.scad — geometry for upright-cell battery bins.
+// battery_bin.scad — geometry for battery bins.
 //
-// Structure (bottom to top):
+// "cells" bins (default): pockets laid out in column groups.
 //   gridfinity base (lite = hollow feet, from gridfinity-rebuilt)
 //   thin floor plate
-//   outer wall + thin tubes around each cell + tie ribs (no solid block)
-//   solid label strip at the front, carrying raised text
+//   outer wall + thin tube around each pocket + tie ribs (no solid block)
+//   hollow label strip at the front whose thin deck carries the text
+// "scoop" bins: open tray, see the end of this file.
 //
-// The body and the text are separate parts so they can be exported as
-// separate objects (Bambu Studio: assign black to the text, done).
+// Pockets: a cell is "round" (d) or "rect" (fp = [x, y] footprint as
+// placed), standing l tall. Upright AA, a coin on edge (fp [d, thick],
+// l = d) and a flat button cell (d, l = thickness) are all just cells.
+// Each pocket is hold × l deep. The bin top sits at the deepest pocket.
+//
+// The body and the text are separate parts, exported as separate objects
+// (Bambu Studio: assign black to the text, done).
 // ===================================================================
 
 include <../lib/gridfinity-rebuilt-openscad/src/core/standard.scad>
@@ -32,7 +38,7 @@ function pick_font(prefs) =
     len(ok) > 0 ? ok[0] : prefs[len(prefs) - 1];
 EPS = 0.01;
 
-// ---------- derived geometry (all functions of a bin id) ----------
+// ---------- table access ----------
 
 function bin_entry(id) =
     let(b = kv(BINS, id))
@@ -41,42 +47,84 @@ function bin_entry(id) =
 
 function P(id, key) = bin_prop(bin_entry(id), key, BIN_DEFAULTS);
 
-function cell_of(id) =
-    let(c = kv(CELLS, P(id, "cell")))
-    assert(!is_undef(c), str("Unknown cell: ", P(id, "cell")))
+function cell(name) =
+    let(c = kv(CELLS, name))
+    assert(!is_undef(c), str("Unknown cell: ", name))
     c;
+function cell_shape(name) = kv(cell(name), "shape", "round");
+function cell_fp(name) =
+    cell_shape(name) == "round" ? [kv(cell(name), "d"), kv(cell(name), "d")]
+                                : kv(cell(name), "fp");
+function cell_l(name) = kv(cell(name), "l");
 
 function outer_size(id) = [for (g = P(id, "grid")) g * 42] - BASE_GAP_MM;
 function inner_size(id) = outer_size(id) - 2 * [P(id, "wall"), P(id, "wall")];
-
-// Hole diameter for column c.
-function hole_d(id, c) = kv(cell_of(id), "d") + at(P(id, "clearance"), c);
-function max_hole_d(id) = kv(cell_of(id), "d") + vmax(P(id, "clearance"));
-function pitch(id) = max_hole_d(id) + P(id, "rib");
-
 function floor_top(id) = BASE_HEIGHT + P(id, "floor");
-function top_z(id) = floor_top(id) + P(id, "hold") * kv(cell_of(id), "l");
 
-// y extent of the hole region (front edge is the back of the label strip)
+// ---------- layout: column groups ----------
+// group = [cell, cols, rows, label, clearance]; label/clearance optional.
+// Shorthand in BINS: cell + cols + rows (+ optional per-column
+// "clearance" list and "col_labels", which become one group per column).
+
+function groups(id) =
+    let(g = kv(bin_entry(id), "groups"))
+    !is_undef(g) ? g :
+    let(cl = P(id, "clearance"), labels = kv(bin_entry(id), "col_labels"),
+        c = P(id, "cell"), n = P(id, "cols"), r = P(id, "rows"))
+    (is_list(cl) || !is_undef(labels))
+        ? [for (i = [0:n-1]) [c, 1, r,
+              is_undef(labels) ? undef : labels[i], at(cl, i)]]
+        : [[c, n, r]];
+
+function g_clr(id, g) = is_undef(g[4]) ? P(id, "clearance") : g[4];
+function g_pocket(id, g) = cell_fp(g[0]) + [1, 1] * g_clr(id, g);
+function g_pitch(id, g) = g_pocket(id, g) + [1, 1] * P(id, "rib");
+function g_width(id, g) = g[1] * g_pitch(id, g).x;
+function g_height(id, g) = g[2] * g_pitch(id, g).y + P(id, "rib");
+
+function _sum(v) = len(v) == 0 ? 0 : v[0] + _sum([for (i = [1:1:len(v)-1]) v[i]]);
+function total_width(id) =
+    _sum([for (g = groups(id)) g_width(id, g)]) + P(id, "rib");
+// left edge (x) of group i
+function g_x0(id, i) = -total_width(id) / 2 + P(id, "rib") / 2
+    + _sum([for (k = [0:1:i-1]) g_width(id, groups(id)[k])]);
+function g_xc(id, i) = g_x0(id, i) + g_width(id, groups(id)[i]) / 2;
+
+// y extent of the pocket region (front edge = back of the label strip)
 function holes_y0(id) = -inner_size(id).y / 2 + P(id, "strip");
 function holes_y1(id) =  inner_size(id).y / 2;
+function holes_yc(id) = (holes_y0(id) + holes_y1(id)) / 2;
 
-// Centre of hole [col, row]
-function hole_xy(id, c, r) =
-    let(n = [P(id, "cols"), P(id, "rows")], p = pitch(id))
-    [ (c - (n.x - 1) / 2) * p,
-      (holes_y0(id) + holes_y1(id)) / 2 + (r - (n.y - 1) / 2) * p ];
+function pocket_depth(id, g) = P(id, "hold") * cell_l(g[0]);
+function top_z(id) = floor_top(id)
+    + max([for (g = groups(id)) pocket_depth(id, g)]);
+
+// Every pocket: [group index, [x, y]]
+function pockets(id) = [
+    for (i = [0:len(groups(id))-1])
+        let(g = groups(id)[i], p = g_pitch(id, g))
+        for (c = [0:g[1]-1], r = [0:g[2]-1])
+            [i, [g_x0(id, i) + (c + 0.5) * p.x,
+                 holes_yc(id) + (r - (g[2] - 1) / 2) * p.y]]
+];
 
 module _check_fit(id) {
-    n = [P(id, "cols"), P(id, "rows")];
-    need = [n.x * pitch(id) + P(id, "rib"), n.y * pitch(id) + P(id, "rib")];
     have = [inner_size(id).x, holes_y1(id) - holes_y0(id)];
+    need = [total_width(id), max([for (g = groups(id)) g_height(id, g)])];
     assert(need.x <= have.x + EPS,
         str(id, ": columns need ", need.x, " mm, only ", have.x, " available"));
     assert(need.y <= have.y + EPS,
         str(id, ": rows need ", need.y, " mm, only ", have.y, " available"));
     echo(str("BIN ", id, ": outer ", outer_size(id), " top_z ", top_z(id),
-             " hole pitch ", pitch(id), " spare [x,y] ", have - need));
+             " pockets ", len(pockets(id)), " spare [x,y] ", have - need));
+}
+
+// ---------- 2D pocket shapes ----------
+
+module pocket2d(id, g, grow=0) {
+    s = g_pocket(id, g) + [2, 2] * grow;
+    if (cell_shape(g[0]) == "round") circle(d=s.x);
+    else rounded_square(s, min(0.6 + grow, min(s) / 2 - EPS), center=true);
 }
 
 // ---------- parts ----------
@@ -98,27 +146,32 @@ module _footprint(id, shrink=0) {
         BASE_TOP_RADIUS - shrink, center=true);
 }
 
-module _holes(id, extra_top=1) {
-    n = [P(id, "cols"), P(id, "rows")];
+module _pocket_cuts(id) {
     ch = P(id, "chamfer");
-    for (c = [0:n.x-1], r = [0:n.y-1]) {
-        d = hole_d(id, c);
-        translate(hole_xy(id, c, r)) {
-            translate([0, 0, floor_top(id)])
-                cylinder(d=d, h=top_z(id) - floor_top(id) + extra_top);
-            translate([0, 0, top_z(id) - ch])
-                cylinder(d1=d, d2=d + 2 * ch + 2 * EPS, h=ch + EPS);
+    zt = top_z(id);
+    for (pk = pockets(id)) {
+        g = groups(id)[pk[0]];
+        depth = pocket_depth(id, g);
+        c = min(ch, depth / 3);
+        translate(pk[1]) {
+            translate([0, 0, zt - depth])
+                linear_extrude(depth + 1) pocket2d(id, g);
+            hull() {
+                translate([0, 0, zt - c]) linear_extrude(EPS) pocket2d(id, g);
+                translate([0, 0, zt]) linear_extrude(EPS) pocket2d(id, g, c);
+            }
         }
     }
 }
 
 module battery_bin_body(id) {
     _check_fit(id);
-    n = [P(id, "cols"), P(id, "rows")];
     inner = inner_size(id);
     rib = P(id, "rib");
     zf = floor_top(id) - EPS;
     zt = top_z(id);
+    gs = groups(id);
+    ng = len(gs);
 
     bin_base(id);
 
@@ -135,25 +188,28 @@ module battery_bin_body(id) {
             }
             // back wall of the (hollow) label strip
             if (P(id, "strip") > 0)
-                translate([-inner.x / 2 - EPS, holes_y0(id) - rib])
-                    square([inner.x + 2 * EPS, rib + EPS]);
-            // tubes around each hole
-            for (c = [0:n.x-1], r = [0:n.y-1])
-                translate(hole_xy(id, c, r))
-                    circle(d=hole_d(id, c) + 2 * rib);
-            // tie ribs: through each row (x) and each column (y)
-            for (r = [0:n.y-1])
-                translate([0, hole_xy(id, 0, r).y])
-                    square([inner.x + 2 * EPS, rib], center=true);
-            for (c = [0:n.x-1])
-                translate([hole_xy(id, c, 0).x, (holes_y0(id) + holes_y1(id)) / 2])
+                translate([-inner.x / 2 - EPS, holes_y0(id) - P(id, "wall")])
+                    square([inner.x + 2 * EPS, P(id, "wall") + EPS]);
+            // a tube around every pocket (solid below shallow pockets)
+            for (pk = pockets(id))
+                translate(pk[1]) pocket2d(id, gs[pk[0]], rib);
+            // tie ribs: each column front-to-back
+            for (pk = pockets(id))
+                translate([pk[1].x, holes_yc(id)])
                     square([rib, holes_y1(id) - holes_y0(id) + 2 * EPS], center=true);
+            // each row across its group; outermost groups run to the wall
+            for (i = [0:ng-1]) {
+                x0 = i == 0 ? -inner.x / 2 - EPS : g_x0(id, i);
+                x1 = i == ng - 1 ? inner.x / 2 + EPS
+                                 : g_x0(id, i) + g_width(id, gs[i]);
+                for (pk = pockets(id)) if (pk[0] == i)
+                    translate([x0, pk[1].y - rib / 2]) square([x1 - x0, rib]);
+            }
         }
-        _holes(id);
+        _pocket_cuts(id);
     }
 
-    // label strip deck: a thin plate bridging front wall -> strip back wall.
-    // Hollow underneath (short bridge), carries the raised text.
+    // label strip deck: thin plate bridging front wall -> strip back wall
     if (P(id, "strip") > 0) {
         deck = P(id, "deck");
         translate([-inner.x / 2 - EPS, -inner.y / 2 - EPS, zt - deck])
@@ -164,28 +220,29 @@ module battery_bin_body(id) {
 module battery_bin_text(id, font_prefs=FONT_PREFS) {
     font = pick_font(font_prefs);
     echo(str("BIN ", id, ": font ", font));
-    n = [P(id, "cols"), P(id, "rows")];
     inner = inner_size(id);
     strip = P(id, "strip");
     y0 = -inner.y / 2;
-    cols = kv(bin_entry(id), "col_labels");
+    gs = groups(id);
     cs = P(id, "col_text_size");
     ms = P(id, "text_size");
     label = P(id, "label");
+    has_g = len([for (g = gs) if (!is_undef(g[3])) 1]) > 0;
 
-    assert(strip > 0 || (is_undef(label) && is_undef(cols)),
+    assert(strip > 0 || (is_undef(label) && !has_g),
         str(id, ": labels need a label strip"));
 
     translate([0, 0, top_z(id) - EPS])
     linear_extrude(P(id, "text_h") + EPS) {
-        if (!is_undef(cols)) {
-            for (c = [0:n.x-1])
-                translate([hole_xy(id, c, 0).x, y0 + strip - 0.8 - cs / 2])
-                    text(cols[c], size=cs, font=font,
+        if (has_g) {
+            yl = is_undef(label) ? y0 + strip / 2 : y0 + strip - 0.8 - cs / 2;
+            for (i = [0:len(gs)-1]) if (!is_undef(gs[i][3]))
+                translate([g_xc(id, i), yl])
+                    text(gs[i][3], size=cs, font=font,
                          halign="center", valign="center");
         }
         if (!is_undef(label)) {
-            avail = is_undef(cols) ? strip : strip - cs - 1.2;
+            avail = has_g ? strip - cs - 1.2 : strip;
             translate([0, y0 + avail / 2])
                 text(label, size=ms, font=font,
                      halign="center", valign="center");
