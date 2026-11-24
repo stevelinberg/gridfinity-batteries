@@ -78,9 +78,17 @@ function groups(id) =
 
 function g_clr(id, g) = is_undef(g[4]) ? P(id, "clearance") : g[4];
 function g_pocket(id, g) = cell_fp(g[0]) + [1, 1] * g_clr(id, g);
-function g_pitch(id, g) = g_pocket(id, g) + [1, 1] * P(id, "rib");
-function g_width(id, g) = g[1] * g_pitch(id, g).x;
-function g_height(id, g) = g[2] * g_pitch(id, g).y + P(id, "rib");
+// Bin-level layout options:
+//   space   [x, y] extra gap between pockets (finger room)
+//   stagger true: odd rows shift half a pitch (hex packing, round cells)
+//   raise   mm: odd rows get a raised floor, so neighbours stand at
+//           alternating heights and every cell can be pinched
+function g_pitch(id, g) = g_pocket(id, g) + [1, 1] * P(id, "rib") + P(id, "space");
+// distance between row centres
+function g_row(id, g) = let(p = g_pitch(id, g))
+    P(id, "stagger") ? max(sqrt(p.x * p.x - p.x * p.x / 4), p.y * sqrt(3) / 2) : p.y;
+function g_width(id, g) = (g[1] + (P(id, "stagger") && g[2] > 1 ? 0.5 : 0)) * g_pitch(id, g).x;
+function g_height(id, g) = g_pitch(id, g).y + (g[2] - 1) * g_row(id, g) + P(id, "rib");
 
 function _sum(v) = len(v) == 0 ? 0 : v[0] + _sum([for (i = [1:1:len(v)-1]) v[i]]);
 function total_width(id) =
@@ -96,16 +104,18 @@ function holes_y1(id) =  inner_size(id).y / 2;
 function holes_yc(id) = (holes_y0(id) + holes_y1(id)) / 2;
 
 function pocket_depth(id, g) = P(id, "hold") * cell_l(g[0]);
+// depth of pocket in row r (raised rows are shallower)
+function row_depth(id, g, r) = pocket_depth(id, g) - (r % 2 == 1 ? P(id, "raise") : 0);
 function top_z(id) = floor_top(id)
     + max([for (g = groups(id)) pocket_depth(id, g)]);
 
-// Every pocket: [group index, [x, y]]
+// Every pocket: [group index, [x, y], row]
 function pockets(id) = [
     for (i = [0:len(groups(id))-1])
         let(g = groups(id)[i], p = g_pitch(id, g))
         for (c = [0:g[1]-1], r = [0:g[2]-1])
-            [i, [g_x0(id, i) + (c + 0.5) * p.x,
-                 holes_yc(id) + (r - (g[2] - 1) / 2) * p.y]]
+            [i, [g_x0(id, i) + (c + 0.5 + (P(id, "stagger") && r % 2 == 1 ? 0.5 : 0)) * p.x,
+                 holes_yc(id) + (r - (g[2] - 1) / 2) * g_row(id, g)], r]
 ];
 
 module _check_fit(id) {
@@ -151,7 +161,7 @@ module _pocket_cuts(id) {
     zt = top_z(id);
     for (pk = pockets(id)) {
         g = groups(id)[pk[0]];
-        depth = pocket_depth(id, g);
+        depth = row_depth(id, g, pk[2]);
         c = min(ch, depth / 3);
         translate(pk[1]) {
             translate([0, 0, zt - depth])

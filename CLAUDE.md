@@ -126,17 +126,17 @@ Medium, Condensed Medium, Condensed ExtraBold. Override for one build with
   the stub printed. So it's the printer's start routine (clumping/wrap
   detection pad), not the model. Closed.
 - Git: Steve now pushes over SSH, which works.
-- **Designed, not yet printed** (batch planned; ~223 cm³ mesh volume ≈
-  ≤ 276 g PLA for the whole batch):
+- **Designed, not yet printed** (batch planned; ~248 cm³ mesh volume ≈
+  ≤ 310 g PLA for the whole batch):
 
 | bin | grid | holds | notes |
 |---|---|---|---|
 | `aa` ×2 | 2x1 | 10 AA each | 5x2 |
-| `aaa` | 2x1 | 12 AAA | 6x2. Staggered rows (not built) would give 17 |
+| `aaa` | 2x1 | 18 AAA | 3 staggered rows of 6 |
 | `9v` ×2 | 2x1 | 4 9V each | upright, snaps up |
-| `npbx1` | 2x1 | 7 NP-BX1 | upright |
-| `coin` | 2x1 | 14 CR2032 + 10 CR2016 | slots on edge, 10 mm deep |
-| `button` | 2x1 | 8 AG13/LR44 + 9 AG3 | flat pockets, 70 % deep |
+| `npbx1` | 2x1 | 6 NP-BX1 | upright, +2.8 mm finger spacing |
+| `coin` | 2x1 | 14 CR2032 + 10 CR2016 | slots on edge; alternate slots 13 / 5 mm deep (`raise` 8) so every coin can be pinched |
+| `button` | 2x2 | 24 AG13/LR44 + 18 AG3 | flat, staggered, 70 % deep |
 | `recharge` | 2x2 | loose | scoop tray, "Recharge" + icon |
 
 ## Next steps
@@ -145,6 +145,7 @@ Medium, Condensed Medium, Condensed ExtraBold. Override for one build with
    feedback: coin-slot and button-pocket fit, whether flat buttons can be
    picked out (may need a fingernail notch), 0.8 tube stiffness.
 2. Steve commits a Bambu project 3MF per bin under `bambu/`.
-3. Possible: staggered (hex) rows (`aaa` → 17); more AG13 (2x2 button bin
-   → 20 AG13 + 24 AG3); CR1620 (needs measuring); AAAA, A23.
+3. Layout options now in place: `stagger`, `raise`, `space` (bin-level
+   keys, see `BIN_DEFAULTS`). CR1620: Steve has only one, so no bin for
+   now. Still to do: AAAA, A23.
 4. Later: charger/tester cradles; GitHub Releases upload; Spellbook note.

@@ -31,7 +31,10 @@ BIN_DEFAULTS = [
     ["floor",       1.2],      // floor plate on top of the base, mm
     ["wall",        1.2],      // outer wall thickness
     ["rib",         0.8],      // tubes / ribs between cells (2 lines @ 0.4)
-    ["chamfer",     0.8],      // lead-in chamfer at the top of each hole
+    ["chamfer",     0.8],
+    ["space",       [0, 0]],   // extra gap between pockets [x, y]
+    ["stagger",     false],    // hex-offset odd rows (round cells)
+    ["raise",       0],        // raise odd rows' floors by this much (mm)      // lead-in chamfer at the top of each hole
     ["strip",       9],        // front label strip depth (y), 0 = none
     ["deck",        1.6],      // label strip top plate (hollow below)
     ["text_size",   5],        // main label font size (mm)
@@ -80,10 +83,10 @@ BINS = [
         ["strip", 6], ["label", "AA"],
     ]],
 
-    // 2 rows of 6.
+    // 3 staggered rows of 6.
     ["aaa", [
         ["cell", "AAA"], ["grid", [2, 1]],
-        ["rows", 2], ["cols", 6],
+        ["rows", 3], ["cols", 6], ["stagger", true],
         ["strip", 6], ["label", "AAA"],
     ]],
 
@@ -94,29 +97,33 @@ BINS = [
         ["strip", 10], ["label", "9V"], ["text_size", 6],
     ]],
 
-    // Sony NP-BX1, 7 upright (contacts up).
+    // Sony NP-BX1, 6 upright (contacts up), spaced for fingers.
     ["npbx1", [
         ["cell", "NPBX1"], ["grid", [2, 1]],
-        ["rows", 1], ["cols", 7],
+        ["rows", 1], ["cols", 6], ["space", [2.8, 0]],
         ["strip", 6], ["label", "NP-BX1"],
     ]],
 
     // Coin cells on edge in slots: 14 x CR2032, 10 x CR2016.
     // Slots get a little extra clearance (narrow slots print tight).
+    // Every other slot is 8 mm shallower, so coins stand at alternating
+    // heights (low: 13 deep / 7 exposed, high: 5 deep / 15 exposed).
     ["coin", [
         ["grid", [2, 1]], ["strip", 6],
+        ["hold", 0.65], ["raise", 8],
         ["groups", [
             ["CR2032", 2, 7,  "CR2032", 0.5],
             ["CR2016", 1, 10, "CR2016", 0.5],
         ]],
     ]],
 
-    // Button cells flat in shallow pockets: 8 x AG13, 9 x AG3.
+    // Button cells flat in shallow staggered pockets:
+    // 24 x AG13, 18 x AG3.
     ["button", [
-        ["grid", [2, 1]], ["strip", 6], ["hold", 0.7],
+        ["grid", [2, 2]], ["strip", 6], ["hold", 0.7], ["stagger", true],
         ["groups", [
-            ["AG13", 4, 2, "AG13 / LR44", 0.4],
-            ["AG3",  3, 3, "AG3",  0.4],
+            ["AG13", 4, 6, "AG13 / LR44", 0.4],
+            ["AG3",  2, 9, "AG3",  0.4],
         ]],
     ]],
 
