@@ -48,7 +48,7 @@ build.py                  renders all bins -> build/<id>/ (gitignored)
 src/batteries.scad        THE data table: BIN_DEFAULTS, CELLS, BINS
 src/battery_bin.scad      geometry for upright-cell bins
 src/util.scad             key/value table helpers
-fonts/DejaVuSans-Bold.ttf bundled so text renders the same on every machine
+fonts/Jost-Bold.ttf       OFL Futura look-alike, fallback when Futura is absent
 lib/gridfinity-rebuilt-openscad   git submodule (pinned commit)
 bambu/                    saved Bambu Studio project 3MFs (committed)
 ```
@@ -73,6 +73,21 @@ that carries the text. Height = base 7 + floor + `hold` × cell length (0.5,
 so cells stand half exposed). There's no stacking lip yet: the cells stick
 up, so nothing can stack on these anyway (open question below).
 
+## Label font
+
+Steve chose **Futura** (`FONT_PREFS` in `src/batteries.scad`, default
+`Futura:style=Bold`). Futura comes with macOS under Apple's license, so it
+**must not be committed**. When Futura is missing (cloud/Linux), the text
+falls back to bundled **Jost Bold**, an OFL Futura look-alike: a static
+wght=700 instance cut from Google Fonts' `Jost[wght].ttf`.
+OpenSCAD silently substitutes missing fonts, so `pick_font()` checks the
+resolved family through `fontmetrics()`. The build log prints
+`BIN <id>: font ...`.
+**Release/print STLs should be rendered on Steve's Mac**, so the text is
+real Futura. Cloud renders are previews only. Other macOS Futura styles:
+Medium, Condensed Medium, Condensed ExtraBold. Override for one build with
+`-D 'FONT_PREFS=["Futura:style=Medium"]'`.
+
 ## Toolchain
 
 - Needs an **OpenSCAD development snapshot** (2025+, Manifold backend).
@@ -96,6 +111,7 @@ up, so nothing can stack on these anyway (open question below).
   0.3/0.5/0.7/0.9, labeled. Preview approved for printing; waiting on
   Steve's print result.
 - Bambu Studio hasn't been tested on the two-object 3MF yet.
+- Label font switched to Futura Bold, with a Jost Bold fallback (see *Label font*).
 
 ### AA capacity estimates (clearance 0.5, rib/wall 1.2, pitch 16.05)
 Label strip at the front. "Stagger" = hex-offset second row; 1-wide bins
@@ -115,7 +131,7 @@ or one 2x2 (20). Pending Steve's choice.
 ## Next steps
 
 1. Steve prints `aa_fit` and reports which clearance feels right. Then set
-   `BIN_DEFAULTS.clearance`; check label legibility (5 / 3.5 mm DejaVu Bold,
+   `BIN_DEFAULTS.clearance`; check label legibility (5 / 3.5 mm Futura Bold,
    0.6 mm raised) and how the 3MF imports in Bambu Studio.
 2. Implement staggered (hex) packing in `battery_bin.scad` (`pack` key),
    and the real AA bin at the size Steve picks.

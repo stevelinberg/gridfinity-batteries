@@ -24,5 +24,5 @@ if (list_bins) {
     if (part == "body" || part == "both")
         color("white") battery_bin_body(bin_id);
     if (part == "text" || part == "both")
-        color("black") battery_bin_text(bin_id);
+        color("black") battery_bin_text(bin_id, FONT_PREFS);
 }

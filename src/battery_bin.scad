@@ -15,11 +15,21 @@ include <../lib/gridfinity-rebuilt-openscad/src/core/standard.scad>
 use <../lib/gridfinity-rebuilt-openscad/src/core/base.scad>
 use <../lib/gridfinity-rebuilt-openscad/src/core/gridfinity-rebuilt-holes.scad>
 use <../lib/gridfinity-rebuilt-openscad/src/helpers/shapes.scad>
-use <../fonts/DejaVuSans-Bold.ttf>
+use <../fonts/Jost-Bold.ttf>
 use <util.scad>
 include <batteries.scad>
 
-FONT = "DejaVu Sans:style=Bold";
+// First font in FONT_PREFS (batteries.scad) that is actually installed.
+// OpenSCAD silently substitutes missing fonts, so check the family that
+// fontmetrics() really resolved to.
+function _family(spec) =
+    let(i = search(":", spec))
+    len(i) > 0 ? [for (k = [0:i[0]-1]) spec[k]] : spec;
+function _str(chars) = len(chars) == 0 ? "" : str(chars[0], _str([for (k = [1:1:len(chars)-1]) chars[k]]));
+function font_ok(spec) = fontmetrics(font=spec).font.family == _str(_family(spec));
+function pick_font(prefs) =
+    let(ok = [for (f = prefs) if (font_ok(f)) f])
+    len(ok) > 0 ? ok[0] : prefs[len(prefs) - 1];
 EPS = 0.01;
 
 // ---------- derived geometry (all functions of a bin id) ----------
@@ -151,7 +161,9 @@ module battery_bin_body(id) {
     }
 }
 
-module battery_bin_text(id) {
+module battery_bin_text(id, font_prefs=FONT_PREFS) {
+    font = pick_font(font_prefs);
+    echo(str("BIN ", id, ": font ", font));
     n = [P(id, "cols"), P(id, "rows")];
     inner = inner_size(id);
     strip = P(id, "strip");
@@ -169,13 +181,13 @@ module battery_bin_text(id) {
         if (!is_undef(cols)) {
             for (c = [0:n.x-1])
                 translate([hole_xy(id, c, 0).x, y0 + strip - 0.8 - cs / 2])
-                    text(cols[c], size=cs, font=FONT,
+                    text(cols[c], size=cs, font=font,
                          halign="center", valign="center");
         }
         if (!is_undef(label)) {
             avail = is_undef(cols) ? strip : strip - cs - 1.2;
             translate([0, y0 + avail / 2])
-                text(label, size=ms, font=FONT,
+                text(label, size=ms, font=font,
                      halign="center", valign="center");
         }
     }

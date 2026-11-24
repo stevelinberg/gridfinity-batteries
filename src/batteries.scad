@@ -10,6 +10,13 @@
 // read with kv(list, key, default) from util.scad.
 // ===================================================================
 
+// ---------- Label font ----------
+// First installed font wins. Futura ships with macOS (licensed with the OS,
+// so it is NOT in this repo). Jost is an open-source (OFL) Futura look-alike
+// bundled in fonts/, so renders elsewhere (cloud, Linux) look nearly the same.
+// Override for one build: -D 'FONT_PREFS=["Futura:style=Medium"]'
+FONT_PREFS = ["Futura:style=Bold", "Jost:style=Bold"];
+
 // ---------- Global defaults (any bin may override) ----------
 BIN_DEFAULTS = [
     // Diametral clearance added to the measured cell diameter.

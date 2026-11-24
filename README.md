@@ -22,4 +22,6 @@ layers, so there's only one color change and no prime tower is needed.
 Rendered STLs are published under GitHub Releases. Project notes for future
 work are in `CLAUDE.md`.
 
-Text uses the bundled DejaVu Sans Bold (see `fonts/DejaVu-LICENSE.txt`).
+Labels use Futura Bold when it's installed (it ships with macOS; not included here).
+Otherwise they fall back to the bundled Jost Bold, an open Futura look-alike
+(`fonts/Jost-OFL.txt`). Change the order in `FONT_PREFS` in `src/batteries.scad`.
