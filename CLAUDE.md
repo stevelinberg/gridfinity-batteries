@@ -141,6 +141,17 @@ Medium, Condensed Medium, Condensed ExtraBold. Override for one build with
 
 ## Next steps
 
+0. **Open design question (2026-11-24): grip.** Steve worries the cells
+   are hard to get out (tight packing) and the raised coins unstable
+   (5 mm hold). Proposed, awaiting his OK:
+   - AA/AAA: `raise` the odd rows (AA back row +10, AAA middle row +8),
+     same bin height, so the raised row can be pinched front-to-back.
+   - Coins: drop alternating heights. All coins held 12 mm (60 %), and
+     ~10 mm finger channels at both ends of each slot column, so coins are
+     pinched by their rims. 3x1: 14 CR2032 + 11 CR2016.
+   - Buttons: a fingernail notch per pocket, plus spacing. 2x2,
+     ~16 AG13 + ~12 AG3.
+   - Print coin + button first, as a quick test.
 1. Steve renders on his Mac (Futura) and prints the batch. Then get
    feedback: coin-slot and button-pocket fit, whether flat buttons can be
    picked out (may need a fingernail notch), 0.8 tube stiffness.
