@@ -104,37 +104,36 @@ Medium, Condensed Medium, Condensed ExtraBold. Override for one build with
 ## Status (2026-11-24)
 
 - Repo scaffolded; submodule pinned at upstream `910e22d` (2025-08-31).
-- AA **measured**: d 14.35, l 50.32 (largest of Steve's cells, mostly
-  NiMH). Other cells are still nominal placeholders.
-- Steve: **no magnets** (no baseplates yet), 0.4 nozzle, 0.2 layers.
-- **`aa_fit` printed** (Futura labels, 3MF import worked). All four holes
-  fit, and **0.3 mm was fine**, so `BIN_DEFAULTS.clearance` is now 0.3.
-  The labels (5 / 3.5 mm Futura Bold, 0.6 raised) printed legibly.
-- Bambu still printed a tiny (~1 mm) purge/prime tower even though Steve
-  thought he'd turned it off. Not yet diagnosed. Once his Bambu project 3MF
-  is committed in `bambu/`, check `Metadata/project_settings.config`
-  (`enable_prime_tower`, filament per object, layer of first color change).
-
-### AA capacity (clearance 0.3, rib/wall 1.2 → pitch 15.85)
-"Slim strip" = 2 square rows plus a ~6.2 mm label strip (fits 5 mm text).
-"Staggered" = hex-offset rows; needs the `pack` feature (not built yet).
-
-| grid | square, slim strip | staggered + label strip |
-|------|------|------|
-| 2x1 | 10 (5x2) | 9 (5/4), 8.3 mm strip |
-| 3x1 | 14 (7x2) | 14 (7/7), 8.3 mm strip |
-| 4x1 | 20 (10x2) | 19 (10/9) |
-| 2x2 | 20 (5x4), 16 mm strip | **23** (5/4/5/4/5), 9 mm strip |
-
-Steve wants 12–24 AAs. Waiting on his bin-size choice.
+- AA **measured**: d 14.35, l 50.32. Other cells still nominal.
+- Steve: **no magnets**, 0.4 nozzle, 0.2 layers, prints on the P2S.
+- `aa_fit` printed fine with Futura labels. **Clearance 0.3** chosen and
+  set as the default.
+- Purge tower mystery: Bambu's slice preview shows **no** tower, and
+  prime tower is off in the project. The ~1 mm stub on the plate is most
+  likely the printer's start routine (purge/flow calibration), not the
+  model. Low priority.
+- Steve's Bambu project for `aa_fit` is committed locally on his Mac, but
+  the push failed: the clone used an HTTPS remote. Fix: switch the remote
+  to SSH (`git@github.com:...`), then `git pull --rebase`.
+- **New bins (previews made, not printed):**
+  - `aa`: 2x1, 2 rows of 5 (10 cells), 6 mm label strip. Steve will
+    print **two** of them.
+  - `aaa`: 2x1, 2 rows of 6. **Nominal dims**, waiting on calipers.
+  - `recharge`: 2x1 open tray (`type: "scoop"`), scoop fillet at the
+    front, 10 mm label ledge at the back with a 45° underside, raised
+    "Recharge" text and a hand-drawn battery+bolt icon (`icon_recharge`).
+- Wall/rib study (mesh volume): `aa` 32.2 cm³ at 1.2/1.2 vs 24.9 cm³ at
+  0.8/0.8 (−23%, ~9 g). `recharge`: 25.5 → 23.2 cm³ (small saving). Steve
+  says 1.2 feels sturdy but flexes slightly. Waiting on his decision.
 
 ## Next steps
 
-1. Steve picks the AA bin size and wall/rib thickness (1.2 felt fine, or
-   try 0.8?). Build it (implement `pack="hex"` if he picks 2x2), and
-   preview it.
-2. Diagnose the purge tower from his saved Bambu 3MF.
-3. AAA (needs caliper numbers), then the rest of the list above.
+1. Steve's answers: 0.8 ribs (keep 1.2 outer wall?); AAA measurements;
+   9V and button-cell measurements and counts.
+2. Build `9v` (rectangular pockets: add `shape: "rect"`) and the button
+   cell bin (shallow pockets, labeled rows), then a batch print:
+   2× aa, aaa, recharge, 9v, buttons.
+3. Then: AAAA, A23, coin cells (vertical slots), NP-BX1.
 4. Open question: stacking lip on/off.
 5. Set up GitHub Releases upload for rendered STLs.
 6. Later: write the project note in Spellbook.

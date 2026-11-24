@@ -19,6 +19,7 @@ FONT_PREFS = ["Futura:style=Bold", "Jost:style=Bold"];
 
 // ---------- Global defaults (any bin may override) ----------
 BIN_DEFAULTS = [
+    ["type",        "cells"],  // "cells" (upright holes) or "scoop" (open tray)
     // Diametral clearance added to the measured cell diameter.
     // May be a single number or a per-column list (fit tests).
     ["clearance",   0.3],      // chosen from aa_fit print 2026-11-24
@@ -60,5 +61,30 @@ BINS = [
         ["label", "AA"],
         ["col_labels", ["0.3", "0.5", "0.7", "0.9"]],
         ["strip", 12],
+    ]],
+
+    // Production AA bin: 2 rows of 5. Print two for 20 cells.
+    ["aa", [
+        ["cell", "AA"], ["grid", [2, 1]],
+        ["rows", 2], ["cols", 5],
+        ["strip", 6], ["label", "AA"],
+    ]],
+
+    // AAA: 2 rows of 6. NOMINAL cell size until measured.
+    ["aaa", [
+        ["cell", "AAA"], ["grid", [2, 1]],
+        ["rows", 2], ["cols", 6],
+        ["strip", 6], ["label", "AAA"],
+    ]],
+
+    // Loose cells waiting for the charger: open bin, scoop front,
+    // label ledge at the back (45° underside, no supports).
+    ["recharge", [
+        ["type", "scoop"], ["grid", [2, 1]],
+        ["height", 33.4],          // total height, matches the AA bin
+        ["scoop_r", 16],
+        ["ledge", 10],             // label ledge depth at the back
+        ["label", "Recharge"], ["icon", "recharge"],
+        ["text_size", 6],
     ]],
 ];

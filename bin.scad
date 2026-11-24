@@ -22,7 +22,7 @@ if (list_bins) {
     echo(str("BIN_IDS=", [for (b = BINS) b[0]]));
 } else {
     if (part == "body" || part == "both")
-        color("white") battery_bin_body(bin_id);
+        color("white") bin_body(bin_id);
     if (part == "text" || part == "both")
-        color("black") battery_bin_text(bin_id, FONT_PREFS);
+        color("black") bin_text(bin_id, FONT_PREFS);
 }

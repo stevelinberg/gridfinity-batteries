@@ -192,3 +192,110 @@ module battery_bin_text(id, font_prefs=FONT_PREFS) {
         }
     }
 }
+
+// ===================================================================
+// Scoop bins ("type" = "scoop"): open tray for loose cells, a scoop
+// fillet along the front, and a label ledge along the back whose top is
+// the highest surface (so the text is still the last thing printed).
+// ===================================================================
+
+function scoop_top(id) = P(id, "height");
+
+module scoop_bin_body(id) {
+    inner = inner_size(id);
+    zf = floor_top(id) - EPS;
+    zt = scoop_top(id);
+    r = P(id, "scoop_r");
+    ledge = P(id, "ledge");
+    deck = P(id, "deck");
+    yb = inner.y / 2;          // back inner wall
+    yf = -inner.y / 2;         // front inner wall
+
+    echo(str("BIN ", id, ": scoop tray, outer ", outer_size(id),
+             " top_z ", zt, " open depth ", zt - floor_top(id)));
+
+    bin_base(id);
+    translate([0, 0, BASE_HEIGHT - EPS])
+        linear_extrude(P(id, "floor") + EPS) _footprint(id);
+
+    // outer wall
+    translate([0, 0, zf]) linear_extrude(zt - zf) difference() {
+        _footprint(id);
+        _footprint(id, P(id, "wall"));
+    }
+
+    // profiles in the (y, z) plane, extruded across the full inner width
+    rotate([90, 0, 90])
+    linear_extrude(inner.x + 2 * EPS, center=true) {
+        // scoop: fills the front-bottom corner with a concave quarter round
+        translate([yf - EPS, zf])
+            difference() {
+                square([r + EPS, r]);
+                translate([r + EPS, r]) circle(r=r, $fn=96);
+            }
+        // label ledge with a 45° underside (prints without supports)
+        polygon([
+            [yb + EPS, zt],
+            [yb - ledge, zt],
+            [yb - ledge, zt - deck],
+            [yb + EPS, zt - deck - ledge],
+        ]);
+    }
+}
+
+// Simple "recharge" icon: battery outline with a lightning bolt.
+// h = overall height in mm; drawn centred, battery pointing right.
+module icon_recharge(h) {
+    w = h * 1.9;               // body width
+    t = max(0.9, h * 0.14);    // outline stroke (≥ 2 lines @ 0.4 nozzle)
+    nub = [h * 0.18, h * 0.45];
+    difference() {
+        square([w, h], center=true);
+        square([w - 2 * t, h - 2 * t], center=true);
+    }
+    translate([w / 2 - EPS, 0]) square([nub.x + EPS, nub.y], center=[false, true]);
+    // bolt
+    s = (h - 2 * t) * 0.92 / 10;
+    scale([s, s]) polygon([
+        [ 1.2,  5.0], [-3.2, -0.6], [ 0.0, -0.6],
+        [-1.2, -5.0], [ 3.2,  0.6], [ 0.0,  0.6],
+    ]);
+}
+
+module scoop_bin_text(id, font) {
+    inner = inner_size(id);
+    ledge = P(id, "ledge");
+    ms = P(id, "text_size");
+    label = P(id, "label");
+    icon = P(id, "icon");
+    ih = ms * 1.1;                         // icon height
+    iw = is_undef(icon) ? 0 : ih * 1.9 + ih * 0.18;
+    gap = is_undef(icon) ? 0 : ms * 0.6;
+    tw = is_undef(label) ? 0 : textmetrics(label, size=ms, font=font).size.x;
+    total = iw + gap + tw;
+    yc = inner.y / 2 - ledge / 2;
+
+    translate([0, 0, scoop_top(id) - EPS])
+    linear_extrude(P(id, "text_h") + EPS) {
+        if (!is_undef(icon))
+            translate([-total / 2 + ih * 0.95, yc]) icon_recharge(ih);
+        if (!is_undef(label))
+            translate([-total / 2 + iw + gap, yc])
+                text(label, size=ms, font=font, halign="left", valign="center");
+    }
+}
+
+// ---------- dispatch on "type" ----------
+
+module bin_body(id) {
+    if (P(id, "type") == "scoop") scoop_bin_body(id);
+    else battery_bin_body(id);
+}
+
+module bin_text(id, font_prefs=FONT_PREFS) {
+    if (P(id, "type") == "scoop") {
+        font = pick_font(font_prefs);
+        echo(str("BIN ", id, ": font ", font));
+        scoop_bin_text(id, font);
+    } else battery_bin_text(id, font_prefs);
+}
