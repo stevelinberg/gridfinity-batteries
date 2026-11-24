@@ -21,7 +21,7 @@ FONT_PREFS = ["Futura:style=Bold", "Jost:style=Bold"];
 BIN_DEFAULTS = [
     // Diametral clearance added to the measured cell diameter.
     // May be a single number or a per-column list (fit tests).
-    ["clearance",   0.6],
+    ["clearance",   0.3],      // chosen from aa_fit print 2026-11-24
     // Fraction of cell length held below the top of the bin.
     // 0.5 = "half exposed for grabbing".
     ["hold",        0.5],

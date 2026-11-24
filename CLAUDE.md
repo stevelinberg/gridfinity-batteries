@@ -105,37 +105,36 @@ Medium, Condensed Medium, Condensed ExtraBold. Override for one build with
 
 - Repo scaffolded; submodule pinned at upstream `910e22d` (2025-08-31).
 - AA **measured**: d 14.35, l 50.32 (largest of Steve's cells, mostly
-  NiMH). In `CELLS`. Other cells are still nominal placeholders.
+  NiMH). Other cells are still nominal placeholders.
 - Steve: **no magnets** (no baseplates yet), 0.4 nozzle, 0.2 layers.
-- `aa_fit` rebuilt with real dims: 2x1, 4 holes, clearance ladder
-  0.3/0.5/0.7/0.9, labeled. Preview approved for printing; waiting on
-  Steve's print result.
-- Bambu Studio hasn't been tested on the two-object 3MF yet.
-- Label font switched to Futura Bold, with a Jost Bold fallback (see *Label font*).
+- **`aa_fit` printed** (Futura labels, 3MF import worked). All four holes
+  fit, and **0.3 mm was fine**, so `BIN_DEFAULTS.clearance` is now 0.3.
+  The labels (5 / 3.5 mm Futura Bold, 0.6 raised) printed legibly.
+- Bambu still printed a tiny (~1 mm) purge/prime tower even though Steve
+  thought he'd turned it off. Not yet diagnosed. Once his Bambu project 3MF
+  is committed in `bambu/`, check `Metadata/project_settings.config`
+  (`enable_prime_tower`, filament per object, layer of first color change).
 
-### AA capacity estimates (clearance 0.5, rib/wall 1.2, pitch 16.05)
-Label strip at the front. "Stagger" = hex-offset second row; 1-wide bins
-leave room for a ~6–8 mm label strip only with 2 rows.
+### AA capacity (clearance 0.3, rib/wall 1.2 → pitch 15.85)
+"Slim strip" = 2 square rows plus a ~6.2 mm label strip (fits 5 mm text).
+"Staggered" = hex-offset rows; needs the `pack` feature (not built yet).
 
-| grid | square (strip ≥9) | 2 rows square, slim strip ~5.8 | staggered rows + ~8 mm strip |
-|------|------|------|------|
-| 1x1 | 2 | 4 | 3 |
-| 2x1 | 4 | 8 | 8 (4/4) |
-| 3x1 | 7 | 14 | 14 (7/7) |
-| 4x1 | 10 | 20 | 19 (10/9) |
-| 2x2 | 16 | 16 | 20 (5 rows of 4) |
+| grid | square, slim strip | staggered + label strip |
+|------|------|------|
+| 2x1 | 10 (5x2) | 9 (5/4), 8.3 mm strip |
+| 3x1 | 14 (7x2) | 14 (7/7), 8.3 mm strip |
+| 4x1 | 20 (10x2) | 19 (10/9) |
+| 2x2 | 20 (5x4), 16 mm strip | **23** (5/4/5/4/5), 9 mm strip |
 
-Steve wants 12–24 AAs. Leading options: one 3x1 (14), two 3x1 (28),
-or one 2x2 (20). Pending Steve's choice.
+Steve wants 12–24 AAs. Waiting on his bin-size choice.
 
 ## Next steps
 
-1. Steve prints `aa_fit` and reports which clearance feels right. Then set
-   `BIN_DEFAULTS.clearance`; check label legibility (5 / 3.5 mm Futura Bold,
-   0.6 mm raised) and how the 3MF imports in Bambu Studio.
-2. Implement staggered (hex) packing in `battery_bin.scad` (`pack` key),
-   and the real AA bin at the size Steve picks.
+1. Steve picks the AA bin size and wall/rib thickness (1.2 felt fine, or
+   try 0.8?). Build it (implement `pack="hex"` if he picks 2x2), and
+   preview it.
+2. Diagnose the purge tower from his saved Bambu 3MF.
 3. AAA (needs caliper numbers), then the rest of the list above.
-4. Open questions: stacking lip on/off; thinner walls/ribs (0.8 mm?).
+4. Open question: stacking lip on/off.
 5. Set up GitHub Releases upload for rendered STLs.
 6. Later: write the project note in Spellbook.
