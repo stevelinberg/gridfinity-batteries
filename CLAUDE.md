@@ -89,24 +89,37 @@ up, so nothing can stack on these anyway (open question below).
 ## Status (2026-11-24)
 
 - Repo scaffolded; submodule pinned at upstream `910e22d` (2025-08-31).
-- `aa_fit` fit-test bin built: 2x1, one row of 4 AA holes with
-  **clearance ladder 0.3 / 0.5 / 0.7 / 0.9 mm** (diametral), labeled. Renders
-  clean (manifold). Body ≈ 27 cm³ ≈ 34 g PLA if printed 100% solid; real
-  use should be lower.
-- **Cell dimensions are nominal IEC values, not measured yet.** Waiting on
-  Steve's caliper numbers (asked 2026-11-24).
+- AA **measured**: d 14.35, l 50.32 (largest of Steve's cells, mostly
+  NiMH). In `CELLS`. Other cells are still nominal placeholders.
+- Steve: **no magnets** (no baseplates yet), 0.4 nozzle, 0.2 layers.
+- `aa_fit` rebuilt with real dims: 2x1, 4 holes, clearance ladder
+  0.3/0.5/0.7/0.9, labeled. Preview approved for printing; waiting on
+  Steve's print result.
 - Bambu Studio hasn't been tested on the two-object 3MF yet.
+
+### AA capacity estimates (clearance 0.5, rib/wall 1.2, pitch 16.05)
+Label strip at the front. "Stagger" = hex-offset second row; 1-wide bins
+leave room for a ~6–8 mm label strip only with 2 rows.
+
+| grid | square (strip ≥9) | 2 rows square, slim strip ~5.8 | staggered rows + ~8 mm strip |
+|------|------|------|------|
+| 1x1 | 2 | 4 | 3 |
+| 2x1 | 4 | 8 | 8 (4/4) |
+| 3x1 | 7 | 14 | 14 (7/7) |
+| 4x1 | 10 | 20 | 19 (10/9) |
+| 2x2 | 16 | 16 | 20 (5 rows of 4) |
+
+Steve wants 12–24 AAs. Leading options: one 3x1 (14), two 3x1 (28),
+or one 2x2 (20). Pending Steve's choice.
 
 ## Next steps
 
-1. Get caliper measurements (AA first), update `CELLS`, rebuild `aa_fit`,
-   show the preview, then Steve prints it.
-2. From the fit test: choose the default clearance; check label legibility
-   (5 mm / 3.5 mm DejaVu Bold, 0.6 mm raised); check that the 3MF imports
-   as body + text in Bambu Studio.
-3. Real AA bin (size TBD with Steve), then AAA, then the others in the
-   list above.
-4. Open questions: stacking lip on/off per bin; magnets (Steve's
-   baseplates?); thinner walls/ribs (0.8 mm?) to save more filament.
+1. Steve prints `aa_fit` and reports which clearance feels right. Then set
+   `BIN_DEFAULTS.clearance`; check label legibility (5 / 3.5 mm DejaVu Bold,
+   0.6 mm raised) and how the 3MF imports in Bambu Studio.
+2. Implement staggered (hex) packing in `battery_bin.scad` (`pack` key),
+   and the real AA bin at the size Steve picks.
+3. AAA (needs caliper numbers), then the rest of the list above.
+4. Open questions: stacking lip on/off; thinner walls/ribs (0.8 mm?).
 5. Set up GitHub Releases upload for rendered STLs.
 6. Later: write the project note in Spellbook.

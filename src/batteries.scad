@@ -35,7 +35,7 @@ BIN_DEFAULTS = [
 // d = max diameter, l = max length (incl. button top).
 // "src" records where the number came from: "nominal" until measured.
 CELLS = [
-    ["AA",  [["d", 14.5], ["l", 50.5], ["src", "nominal IEC LR6 max — REPLACE WITH CALIPER"]]],
+    ["AA",  [["d", 14.35], ["l", 50.32], ["src", "caliper 2026-11-24, largest of Steve's cells (mostly NiMH)"]]],
     ["AAA", [["d", 10.5], ["l", 44.5], ["src", "nominal IEC LR03 max — REPLACE WITH CALIPER"]]],
 ];
 
