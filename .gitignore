@@ -1,0 +1,4 @@
+build/
+*.stl
+!bambu/**
+.DS_Store
