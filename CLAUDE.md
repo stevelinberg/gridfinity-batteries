@@ -141,8 +141,10 @@ Medium, Condensed Medium, Condensed ExtraBold. Override for one build with
 
 ## Next steps
 
-1. Grip redesign done (Steve OK'd it 2026-11-24). **Print `coin` and
-   `button` first** as a quick test, then the rest. Steve renders on his
+1. Grip redesign done (Steve OK'd it 2026-11-24). `coin` and `button`
+   rendered on Steve's Mac (Futura OK, auto-detected OpenSCAD.app); he is
+   assessing them. **2026-11-25: printing `aa` ×2 + `aaa` next** (no design
+   changes needed). Then the rest. Steve renders on his
    Mac (Futura). Then get
    feedback: coin/button slot fit and rim grip, 0.8 tube stiffness.
    (`notch` is still available but unused.)
