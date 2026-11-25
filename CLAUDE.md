@@ -124,7 +124,13 @@ Medium, Condensed Medium, Condensed ExtraBold. Override for one build with
   `/usr/local/bin/openscad` that runs
   `docker run --rm -v /home/user:/home/user -w "$PWD" openscad/openscad:dev openscad "$@"`.
 - Previews: `./build.py` (PNG via `--render`, colors honored).
-- 3MF: `--enable=lazy-union` gives two objects (body white, text black).
+- 3MF: `--enable=lazy-union` gives separate objects (body white, text
+  black, lid). **Gotcha:** lazy-union also stops `for()` from unioning
+  its children, so `intersection() { A; for (...) ... }` intersects
+  every iteration and comes out empty. Always wrap such loops in an
+  explicit `union()`. This bit the lid mesh (2026-11-25): the 3MF lid
+  was solid while the STL was fine. Check by comparing per-object
+  volumes in the 3MF vs the STLs (trimesh).
 
 ## Status (2026-11-24)
 
@@ -157,16 +163,15 @@ Medium, Condensed Medium, Condensed ExtraBold. Override for one build with
 
 ## Next steps
 
-1. 2026-11-25: Steve printed the slot-style `coin`/`button`. Too loose,
-   cells rolled around, so both are now lidboxes, plus `weirdos`.
-   **Print one lidbox first** to tune the hinge snap (PIN_THROAT) and
-   latch (BUMP / groove) in `battery_bin.scad`; all three are untested. **2026-11-25: printing `aa` ×2 + `aaa` next** (no design
-   changes needed). Then the rest. Steve renders on his
-   Mac (Futura). Then get
-   feedback: coin/button slot fit and rim grip, 0.8 tube stiffness.
-   (`notch` is still available but unused.)
-2. Steve commits a Bambu project 3MF per bin under `bambu/`.
-3. Layout options now in place: `stagger`, `raise`, `space`, `notch`,
-   `channel` (bin-level keys, see `BIN_DEFAULTS`). CR1620: Steve has only one, so no bin for
-   now. Still to do: AAAA, A23.
-4. Later: charger/tester cradles; GitHub Releases upload; Spellbook note.
+1. Lidboxes (`coin`, `button`, `weirdos`): Steve built `weirdos`; the 3MF
+   lid had no mesh (lazy-union bug, fixed 2026-11-25). Next: he re-renders,
+   prints `weirdos`, and reports on the hinge snap (PIN_THROAT), latch
+   (BUMP / groove), finger dip and mesh visibility. Tune, then print
+   `coin` + `button`.
+2. `aa` ×2 + `aaa`: ready to print (raised rows, 0.8 tubes). Then 9V,
+   NP-BX1, Recharge. Get feedback on pinch grip and tube stiffness.
+3. Steve commits a Bambu project 3MF per bin under `bambu/`.
+4. Layout options in place: `stagger`, `raise`, `space`, `notch`
+   (unused), `channel` (unused now). No CR1620 bin (Steve has just one).
+   Still to do: AAAA, A23.
+5. Later: charger/tester cradles; GitHub Releases upload; Spellbook note.

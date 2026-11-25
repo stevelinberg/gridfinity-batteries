@@ -541,7 +541,10 @@ module lidbox_lid_closed(id) {
         intersection() {
             translate([-hw + 2.5, yf + 3.5, zt - t - 1])
                 cube([2 * hw - 5, ax[0] - t / 2 - 2 - yf - 3.5, t + 2]);
-            for (j = [0:40], i = [-30:30])
+            // explicit union(): with --enable=lazy-union (used for the
+            // 3MF) a bare for() would hand intersection() 2,500 separate
+            // children, and the holes would vanish
+            union() for (j = [0:40], i = [-30:30])
                 translate([i * pitch + (j % 2) * pitch / 2,
                            yf + 3.5 + j * pitch * sqrt(3) / 2,
                            zt - t - 1])
