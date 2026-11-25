@@ -4,8 +4,10 @@
 For each bin id:
     build/<id>/<id>-body.stl   white body
     build/<id>/<id>-text.stl   black raised text
-    build/<id>/<id>.3mf        both, as two separate objects (lazy-union)
+    build/<id>/<id>-lid.stl    lid, upside down for printing (lidded boxes)
+    build/<id>/<id>.3mf        all parts as separate objects (lazy-union)
     build/<id>/<id>.png        colored preview
+    build/<id>/<id>-closed.png lidded boxes: preview with the lid shut
 
 Usage:
     ./build.py                 # all bins
@@ -75,16 +77,19 @@ def scad(*args, defines=None):
 def bin_ids():
     log = scad("-o", "-", "--export-format=echo",
                defines={"list_bins": "true"})
-    m = re.search(r'BIN_IDS=\[(.*?)\]', log)
-    return re.findall(r'"([^"]+)"', m.group(1)) if m else []
+    ids = {}
+    for key in ("BIN_IDS", "LID_IDS"):
+        m = re.search(key + r'=\[(.*?)\]', log)
+        ids[key] = re.findall(r'"([^"]+)"', m.group(1)) if m else []
+    return ids["BIN_IDS"], set(ids["LID_IDS"])
 
 
-def build(bin_id, png=True):
+def build(bin_id, has_lid=False, png=True):
     d = OUT / bin_id
     d.mkdir(parents=True, exist_ok=True)
     q = lambda s: f'"{s}"'
     print(f"== {bin_id}")
-    for part in ("body", "text"):
+    for part in ("body", "text") + (("lid",) if has_lid else ()):
         scad("--export-format=binstl", "-o", str(d / f"{bin_id}-{part}.stl"),
              defines={"bin_id": q(bin_id), "part": q(part)})
     scad("--enable=lazy-union", "-o", str(d / f"{bin_id}.3mf"),
@@ -92,6 +97,9 @@ def build(bin_id, png=True):
     if png:
         scad(*PREVIEW, "-o", str(d / f"{bin_id}.png"),
              defines={"bin_id": q(bin_id), "part": q("both")})
+        if has_lid:
+            scad(*PREVIEW, "-o", str(d / f"{bin_id}-closed.png"),
+                 defines={"bin_id": q(bin_id), "part": q("closed")})
 
 
 def main():
@@ -100,12 +108,12 @@ def main():
     ap.add_argument("bins", nargs="*")
     ap.add_argument("--no-png", action="store_true")
     a = ap.parse_args()
-    known = bin_ids()
+    known, lids = bin_ids()
     for b in a.bins:
         if b not in known:
             sys.exit(f"unknown bin '{b}'; known: {', '.join(known)}")
     for b in a.bins or known:
-        build(b, png=not a.no_png)
+        build(b, has_lid=b in lids, png=not a.no_png)
 
 
 if __name__ == "__main__":

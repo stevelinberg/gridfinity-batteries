@@ -21,9 +21,11 @@ it hasn't been written yet.
 - **One separately printable bin per battery type**, no mega-bin. Planned:
   - AA (alkaline + NiMH; holes sized to the largest cell measured)
   - AAA (same), AAAA, 9V/6LR61, A23
-  - coin cells CR2032, CR2016, CR1620 (vertical slots)
-  - button cells LR44, LR41, SR936/394 (shallow pockets; maybe one shared
-    bin with labeled rows)
+  - coin cells and button cells: **loose in lidded boxes** (changed
+    2026-11-25: slots and pockets were too loose and cells rolled around).
+    Hinged, snap-shut, see-through hex-mesh lid, so they can be carried
+    without spilling and you can see when one is empty.
+  - "Weirdos": same lidded box, for odd loose cells with no bin of their own
   - Sony NP-BX1 camera batteries
   - loose "to recharge" bin with a scoop front
   - later: cradles for battery testers and chargers
@@ -81,6 +83,19 @@ across per row within its group). A hollow label strip at the front has a
 **scoop bins** (`type: "scoop"`): open tray, quarter-round scoop at the
 front, 10 mm label ledge at the back with a 45° underside, and a
 hand-drawn battery+bolt icon (`icon_recharge`).
+**lidbox bins** (`type: "lidbox"`): compartments (`compartments` =
+`[[label, width weight], ...]`) with a scoop against a solid 8 mm label
+strip, dividers up to the lid, and side rails with a ledge. The lid is
+inset and flush with the rim (3.2 mm thick, 3 mm hex mesh, 1 mm walls).
+It has a rounded back edge, and two Ø2 side pins that snap down through
+1.8 mm keyhole throats in the rails (each jaw has a relief slit). That
+makes a lift-off hinge that opens to vertical. The front latch is a
+1.2 mm sprung tab with a 0.45 mm bump that clicks into a groove in the
+strip, under a finger dip at the first divider (or the right end).
+Dividers are notched for the tab. Checked in OpenSCAD: no lid/box overlap
+when closed, and the lid swings clear at 30/60/90°. The lid is a separate
+white part, printed upside down (`-lid.stl`, the third object in the 3MF).
+Previews include `<id>-closed.png`.
 No stacking lip: the cells stick up, so nothing can stack anyway.
 
 ## Label font
@@ -135,15 +150,17 @@ Medium, Condensed Medium, Condensed ExtraBold. Override for one build with
 | `aaa` | 2x1 | 18 AAA | 3 staggered rows of 6; middle row `raise` 8 |
 | `9v` ×2 | 2x1 | 4 9V each | upright, snaps up |
 | `npbx1` | 2x1 | 6 NP-BX1 | upright, +2.8 mm finger spacing |
-| `coin` | **3x1** | 14 CR2032 + 10 CR2016 | slots on edge, all 12 mm held / 8 showing; 10.8 mm finger `channel`s, 7 deep, at both ends of each column, so coins are gripped by their rims |
-| `button` | 2x2 | 22 AG13/LR44 + 15 AG3 | **on edge in slots like the coins** (flat pockets with notches were rejected: notches unreachable past the first row). Half held; rim-grip channels, depth capped at 75 % of the slot |
+| `coin` | 2x1 lidbox | CR2032 \| CR2016 compartments | 15 mm deep, hex-mesh snap lid. Replaces the slot design |
+| `button` | 2x1 lidbox | AG13/LR44 (⅔) \| AG3 (⅓) | same. Replaces the slot design |
+| `weirdos` | 2x1 lidbox | one compartment | odd loose cells |
 | `recharge` | 2x2 | loose | scoop tray, "Recharge" + icon |
 
 ## Next steps
 
-1. Grip redesign done (Steve OK'd it 2026-11-24). `coin` and `button`
-   rendered on Steve's Mac (Futura OK, auto-detected OpenSCAD.app); he is
-   assessing them. **2026-11-25: printing `aa` ×2 + `aaa` next** (no design
+1. 2026-11-25: Steve printed the slot-style `coin`/`button`. Too loose,
+   cells rolled around, so both are now lidboxes, plus `weirdos`.
+   **Print one lidbox first** to tune the hinge snap (PIN_THROAT) and
+   latch (BUMP / groove) in `battery_bin.scad`; all three are untested. **2026-11-25: printing `aa` ×2 + `aaa` next** (no design
    changes needed). Then the rest. Steve renders on his
    Mac (Futura). Then get
    feedback: coin/button slot fit and rim grip, 0.8 tube stiffness.

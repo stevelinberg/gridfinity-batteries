@@ -19,7 +19,8 @@ FONT_PREFS = ["Futura:style=Bold", "Jost:style=Bold"];
 
 // ---------- Global defaults (any bin may override) ----------
 BIN_DEFAULTS = [
-    ["type",        "cells"],  // "cells" (upright holes) or "scoop" (open tray)
+    ["type",        "cells"],  // "cells" (pockets), "scoop" (open tray),
+                               // "lidbox" (compartments under a hinged lid)
     // Diametral clearance added to the measured cell diameter.
     // May be a single number or a per-column list (fit tests).
     ["clearance",   0.3],      // chosen from aa_fit print 2026-11-24
@@ -44,6 +45,11 @@ BIN_DEFAULTS = [
     ["text_size",   5],        // main label font size (mm)
     ["text_h",      0.6],      // raised text height (3 layers @ 0.2)
     ["col_text_size", 3.5],    // per-group labels
+    // lidded boxes
+    ["depth",       15],       // inside depth under the lid
+    ["lid_t",       3.2],      // lid thickness (16 layers)
+    ["mesh",        3.0],      // lid hex holes, across flats
+    ["mesh_wall",   1.0],      // lid hex walls
 ];
 
 // ---------- Cells ----------
@@ -109,30 +115,25 @@ BINS = [
         ["strip", 6], ["label", "NP-BX1"],
     ]],
 
-    // Coin cells on edge in slots, all the same height: 12 mm held
-    // (60 %), 8 mm showing. 10 mm finger channels at both ends of every
-    // slot column, 7 mm deep, so a coin is pinched by its rims.
-    // 14 x CR2032 + 10 x CR2016. Slots get 0.5 clearance (narrow slots
-    // print tight).
+    // Small cells live loose in lidded boxes. (Slots on edge were too
+    // loose: cells rolled around.) Hex-mesh lid shows what's inside.
     ["coin", [
-        ["grid", [3, 1]], ["strip", 6],
-        ["hold", 0.6], ["space", [10, 0]], ["channel", [10.8, 7]],
-        ["groups", [
-            ["CR2032", 2, 7,  "CR2032", 0.5],
-            ["CR2016", 1, 10, "CR2016", 0.5],
-        ]],
+        ["type", "lidbox"], ["grid", [2, 1]], ["strip", 8],
+        ["scoop_r", 8], ["text_size", 4.5],
+        ["compartments", [["CR2032", 1], ["CR2016", 1]]],
     ]],
 
-    // Button cells on edge in slots, same rim-grip idea as the coin bin:
-    // half held, half showing; finger channels at both ends of each column
-    // (depth capped at 75 % of the slot). 22 x AG13 + 15 x AG3.
     ["button", [
-        ["grid", [2, 2]], ["strip", 6], ["hold", 0.5],
-        ["space", [10, 0]], ["channel", [10.8, 7]],
-        ["groups", [
-            ["AG13", 2, 11, "AG13 / LR44", 0.4],
-            ["AG3",  1, 15, "AG3",  0.4],
-        ]],
+        ["type", "lidbox"], ["grid", [2, 1]], ["strip", 8],
+        ["scoop_r", 8], ["text_size", 4.5],
+        ["compartments", [["AG13 / LR44", 2], ["AG3", 1]]],
+    ]],
+
+    // Odd loose cells with no bin of their own.
+    ["weirdos", [
+        ["type", "lidbox"], ["grid", [2, 1]], ["strip", 8],
+        ["scoop_r", 8], ["text_size", 5.5],
+        ["compartments", [["Weirdos", 1]]],
     ]],
 
     // Loose cells waiting for the charger (also NP-BX1s): open tray,

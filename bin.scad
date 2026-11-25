@@ -4,11 +4,14 @@
 //
 // part: "body"  — white bin body only
 //       "text"  — black raised text only
-//       "both"  — both as separate top-level objects (use with
-//                 --enable=lazy-union for a two-object 3MF, or for previews)
-// list_bins=true just echoes the bin ids (used by build.py).
+//       "lid"   — lid only, upside down for printing (lidded boxes)
+//       "both"  — body, text (and lid, beside it) as separate top-level
+//                 objects: use with --enable=lazy-union for a 3MF
+//       "closed"— preview only: lidded box with the lid shut
+// list_bins=true just echoes the bin ids and which have lids (build.py).
 
 use <src/battery_bin.scad>
+use <src/util.scad>
 include <src/batteries.scad>
 
 bin_id = "aa_fit";
@@ -20,9 +23,14 @@ $fs = 0.25;
 
 if (list_bins) {
     echo(str("BIN_IDS=", [for (b = BINS) b[0]]));
+    echo(str("LID_IDS=", [for (b = BINS) if (kv(b[1], "type") == "lidbox") b[0]]));
 } else {
-    if (part == "body" || part == "both")
+    if (part == "body" || part == "both" || part == "closed")
         color("white") bin_body(bin_id);
-    if (part == "text" || part == "both")
+    if (part == "text" || part == "both" || part == "closed")
         color("black") bin_text(bin_id, FONT_PREFS);
+    if (part == "lid" || part == "both")
+        color("white") bin_lid(bin_id, "print");
+    if (part == "closed")
+        color("gainsboro") bin_lid(bin_id, "closed");
 }
