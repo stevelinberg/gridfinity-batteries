@@ -27,7 +27,7 @@ it hasn't been written yet.
     without spilling and you can see when one is empty.
   - "Weirdos": same lidded box, for odd loose cells with no bin of their own
   - Sony NP-BX1 camera batteries
-  - loose "to recharge" bin with a scoop front
+  - loose "to recharge" bin: a 2x2 **lidded box** (lid added 2026-11-26), "Recharge" + icon
   - later: cradles for battery testers and chargers
 - **Save filament:** short bins with cells half-exposed for grabbing; thin
   ribs and floor instead of solid blocks; lite base; hex cutouts in walls
@@ -80,7 +80,7 @@ then a 1.2 mm floor plate bridging the feet, then a 1.2 mm outer wall, a
 0.8 mm tube around each pocket, and tie ribs (front-to-back per column,
 across per row within its group). A hollow label strip at the front has a
 1.6 mm deck carrying the group labels and/or the main label.
-**scoop bins** (`type: "scoop"`): open tray, quarter-round scoop at the
+**scoop bins** (`type: "scoop"`, no longer used by any bin): open tray, quarter-round scoop at the
 front, 10 mm label ledge at the back with a 45° underside, and a
 hand-drawn battery+bolt icon (`icon_recharge`).
 **lidbox bins** (`type: "lidbox"`): compartments (`compartments` =
@@ -176,7 +176,7 @@ Medium, Condensed Medium, Condensed ExtraBold. Override for one build with
 | `coin` | 2x1 lidbox | CR2032 \| CR2016 compartments | 15 mm deep, hex-mesh snap lid. Replaces the slot design |
 | `button` | 2x1 lidbox | AG13/LR44 (⅔) \| AG3 (⅓) | same. Replaces the slot design |
 | `weirdos` | 2x1 lidbox | one compartment | odd loose cells |
-| `recharge` | 2x2 | loose | scoop tray, "Recharge" + icon; scoop r 22 (was 16) |
+| `recharge` | 2x2 lidbox | loose cells + NP-BX1s | one compartment, 22 mm deep (33.4 total, same as AA), scoop r 22, "Recharge" + battery icon on the strip |
 
 ## Next steps
 

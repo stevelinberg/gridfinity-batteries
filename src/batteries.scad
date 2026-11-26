@@ -136,14 +136,13 @@ BINS = [
         ["compartments", [["Weirdos", 1]]],
     ]],
 
-    // Loose cells waiting for the charger (also NP-BX1s): open tray,
-    // scoop front, label ledge at the back (45° underside, no supports).
+    // Loose cells waiting for the charger (also NP-BX1s): one big
+    // compartment under a hex-mesh lid, so it can be carried without
+    // spilling. Same height as the AA bin. (Was an open scoop tray.)
     ["recharge", [
-        ["type", "scoop"], ["grid", [2, 2]],
-        ["height", 33.4],          // total height, matches the AA bin
-        ["scoop_r", 22],           // big, gentle scoop (open depth 25)
-        ["ledge", 10],             // label ledge depth at the back
-        ["label", "Recharge"], ["icon", "recharge"],
-        ["text_size", 6],
+        ["type", "lidbox"], ["grid", [2, 2]], ["strip", 8],
+        ["depth", 22],             // total height 33.4
+        ["text_size", 5], ["icon", "recharge"],
+        ["compartments", [["Recharge", 1]]],
     ]],
 ];

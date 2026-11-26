@@ -574,14 +574,26 @@ module lidbox_text(id, font) {
     comps = lb_comps(id);
     nc = len(comps);
     ms = P(id, "text_size");
+    icon = P(id, "icon");
     translate([0, 0, lb_top(id) - EPS])
     linear_extrude(P(id, "text_h") + EPS)
     for (i = [0:nc-1]) {
         // a lone compartment's label moves left, clear of the finger dip
         cx = nc == 1 ? (-inner.x / 2 + lb_notch_x(id) - 6) / 2
                      : (lb_cx0(id, i) + lb_cx1(id, i)) / 2;
-        translate([cx, yc])
-            text(comps[i][0], size=ms, font=font, halign="center", valign="center");
+        if (nc == 1 && !is_undef(icon)) {
+            // icon + label, centred together
+            ih = min(ms * 1.1, strip - REBATE - 1);
+            iw = ih * 1.9 + ih * 0.18;
+            gap = ms * 0.6;
+            tw = textmetrics(comps[i][0], size=ms, font=font).size.x;
+            x0 = cx - (iw + gap + tw) / 2;
+            translate([x0 + ih * 0.95, yc]) icon_recharge(ih);
+            translate([x0 + iw + gap, yc])
+                text(comps[i][0], size=ms, font=font, halign="left", valign="center");
+        } else
+            translate([cx, yc])
+                text(comps[i][0], size=ms, font=font, halign="center", valign="center");
     }
 }
 
