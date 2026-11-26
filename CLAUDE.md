@@ -33,8 +33,8 @@ it hasn't been written yet.
   ribs and floor instead of solid blocks; lite base; hex cutouts in walls
   only where they really save material (taller bins).
 - **White bins, raised black text on the top face.** Body and text are
-  exported as **separate objects** (two STLs and a two-object 3MF) so Bambu
-  Studio can assign black with one click. Text sits on the topmost layers,
+  exported as **separate objects** (separate STLs and a multi-object 3MF,
+  uncolored) so Bambu Studio can assign black with one click. Text sits on the topmost layers,
   so there's only one color change, and Steve prints with the prime tower off.
   → Nothing in the body may rise above the label's top surface.
 - **Repo layout:** SCAD source + data table + build script that renders
@@ -138,6 +138,11 @@ Medium, Condensed Medium, Condensed ExtraBold. Override for one build with
   explicit `union()`. This bit the lid mesh (2026-11-25): the 3MF lid
   was solid while the STL was fine. Check by comparing per-object
   volumes in the 3MF vs the STLs (trimesh).
+- 3MFs are exported with `-O export-3mf/color-mode=none` (2026-11-26).
+  OpenSCAD otherwise writes a color on every triangle, which Bambu Studio
+  imports as color painting. Painting overrides the object's filament, so
+  a second imported 3MF couldn't be recolored. Steve assigns filaments in
+  Bambu: per bin, object 1 = body, 2 = text, 3 = lid (lidboxes).
 
 ## Status (2026-11-24)
 

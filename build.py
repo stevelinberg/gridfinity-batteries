@@ -92,7 +92,11 @@ def build(bin_id, has_lid=False, png=True):
     for part in ("body", "text") + (("lid",) if has_lid else ()):
         scad("--export-format=binstl", "-o", str(d / f"{bin_id}-{part}.stl"),
              defines={"bin_id": q(bin_id), "part": q(part)})
-    scad("--enable=lazy-union", "-o", str(d / f"{bin_id}.3mf"),
+    # No colors in the 3MF: per-triangle colors import into Bambu Studio
+    # as color *painting*, which overrides the filament you assign to an
+    # object (and breaks multi-file plates). Assign filaments in Bambu.
+    scad("--enable=lazy-union", "-O", "export-3mf/color-mode=none",
+         "-o", str(d / f"{bin_id}.3mf"),
          defines={"bin_id": q(bin_id), "part": q("both")})
     if png:
         scad(*PREVIEW, "-o", str(d / f"{bin_id}.png"),
