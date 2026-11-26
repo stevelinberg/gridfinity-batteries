@@ -371,29 +371,37 @@ module scoop_bin_text(id, font) {
 // Lidded boxes ("type" = "lidbox"): loose small cells (coins, buttons,
 // odds and ends) in compartments, under a see-through hex-mesh lid.
 //
-//   front label strip (solid; carries the text; NOT covered by the lid)
-//   compartments with a scoop against the strip, dividers up to the lid
-//   side rails with a ledge the lid rests on
-//   inset lid, top flush with the rim: hex mesh, rounded back edge,
-//   two side pins that snap down into keyhole slots in the rails
-//   (lift-off hinge, opens to vertical), and a sprung tab at the front
-//   whose bump clicks into a groove in the strip. A finger dip in the
-//   strip, right over the latch, to lift the lid.
+//   front label strip (solid; carries the text; NOT covered by the lid),
+//     with a rebate along its back edge that the lid's front edge rests in
+//   compartments whose scoop rises the full inside depth, tangent to the
+//     strip face, so cells slide up and out with nothing to catch on
+//     (no ledges or lips around the inside)
+//   side rails (45° underside) holding the hinge keyholes and the detent
+//     dimples; dividers up to the lid also support it
+//   inset lid, top flush with the rim: hex mesh, rounded back edge, two
+//     side pins that snap down into keyhole slots (lift-off hinge, opens
+//     to vertical), two side detent bumps near the front that click into
+//     the rails, and a pull tab standing up at the front edge, over the
+//     finger dip
 //
-// The lid is a separate white part, printed upside down (top on the bed).
+// The lid is a separate white part, printed right side up (flat bottom
+// on the bed, tab up). It is lower than the box, so the box's text is
+// still the last thing printed on the plate.
 // ===================================================================
 
 LID_C      = 0.25;   // lid-to-box gap all round
-LID_RAIL   = 2.0;    // side rail width (holds the hinge keyholes)
-LID_LEDGE  = 1.2;    // ledge the lid sits on
+LID_RAIL   = 2.0;    // side rail width (holds keyholes and detents)
+REBATE     = 2.0;    // lid front edge overlaps the strip by this much
 PIN_D      = 2.0;    // hinge pin diameter
 PIN_HOLE_D = 2.3;    // keyhole round part
 PIN_THROAT = 1.8;    // keyhole throat (snap: 0.2 mm interference)
 PIN_LEN    = 1.25;   // pin length out of the lid side
-TAB_W      = 16;     // latch tab width
-TAB_T      = 1.2;    // latch tab thickness
-TAB_H      = 2.6;    // latch tab drop below the lid
-BUMP       = 0.45;   // latch bump
+TAB_W      = 16;     // pull tab width
+TAB_T      = 1.6;    // pull tab thickness
+TAB_H      = 3.0;    // pull tab height above the lid
+DET_R      = 0.8;    // detent bump radius...
+DET_OUT    = 0.5;    // ...and how far it stands proud of the lid side
+DET_Y      = 5;      // detent distance behind the lid's front edge
 
 function lb_t(id)    = P(id, "lid_t");
 function lb_top(id)  = floor_top(id) + P(id, "depth") + lb_t(id);
@@ -403,6 +411,8 @@ function lb_x0(id)   =  inner_size(id).x / 2 - LID_RAIL;          // rail inner 
 function lb_axis(id) = [lb_yi1(id) - lb_t(id) / 2 - 0.35,          // hinge axis (y, z)
                         lb_top(id) - lb_t(id) / 2];
 function lb_lid_hw(id) = lb_x0(id) - LID_C;                       // lid half width
+function lb_lid_yf(id) = lb_yc0(id) - REBATE + LID_C;             // lid front edge
+function lb_scoop_r(id) = is_undef(P(id, "scoop_r")) ? P(id, "depth") : P(id, "scoop_r");
 
 // compartments: [[label, weight], ...] across the full inner width
 function lb_comps(id) = P(id, "compartments");
@@ -410,11 +420,13 @@ function lb_wsum(id) = _sum([for (c = lb_comps(id)) c[1]]);
 function lb_cx0(id, i) = -inner_size(id).x / 2
     + inner_size(id).x * _sum([for (k = [0:1:i-1]) lb_comps(id)[k][1]]) / lb_wsum(id);
 function lb_cx1(id, i) = lb_cx0(id, i + 1);
-// finger dip / latch x: first divider, or near the right end
+// finger dip and pull tab x: first divider, or near the right end
 function lb_notch_x(id) = len(lb_comps(id)) > 1 ? lb_cx1(id, 0)
                                                  : inner_size(id).x / 2 - 9;
 function lb_tab_x(id) = min(lb_notch_x(id), lb_lid_hw(id) - TAB_W / 2 - 1);
-function lb_latch_z(id) = lb_top(id) - lb_t(id) - TAB_H + 1.0;   // bump / groove centre
+function lb_det_pos(id) = [lb_lid_hw(id) - DET_R + DET_OUT,       // bump centre (x, y, z)
+                           lb_lid_yf(id) + DET_Y,
+                           lb_top(id) - lb_t(id) / 2];
 
 module lidbox_body(id) {
     inner = inner_size(id);
@@ -426,9 +438,11 @@ module lidbox_body(id) {
     x0 = inner.x / 2;
     ax = lb_axis(id);
     nc = len(lb_comps(id));
+    r = lb_scoop_r(id);
 
     echo(str("BIN ", id, ": lidded box, outer ", outer_size(id), " top_z ", zt,
-             " inside depth ", P(id, "depth"), " compartments ", nc));
+             " inside depth ", P(id, "depth"), " scoop r ", r,
+             " compartments ", nc));
 
     bin_base(id);
     translate([0, 0, BASE_HEIGHT - EPS])
@@ -444,47 +458,32 @@ module lidbox_body(id) {
             // solid label strip
             translate([-x0 - EPS, -inner.y / 2 - EPS, zf])
                 cube([inner.x + 2 * EPS, P(id, "strip") + EPS, zt - zf]);
-            // side rails + ledge, 45° chamfer underneath
+            // side rails, 45° underside (no ledge)
             for (m = [0, 1]) mirror([m, 0, 0])
-                translate([0, yc0 - EPS, 0]) rotate([-90, 0, 0])
-                linear_extrude(yi1 - yc0 + 2 * EPS) mirror([0, 1, 0])
+                translate([0, yc0 - REBATE - EPS, 0]) rotate([-90, 0, 0])
+                linear_extrude(yi1 - yc0 + REBATE + 2 * EPS) mirror([0, 1, 0])
                 polygon([
                     [x0 + EPS, zt], [x0 - LID_RAIL, zt],
                     [x0 - LID_RAIL, zt - t],
-                    [x0 - LID_RAIL - LID_LEDGE, zt - t],
-                    [x0 - LID_RAIL - LID_LEDGE, zt - t - LID_LEDGE],
-                    [x0 + EPS, zt - t - LID_LEDGE - LID_RAIL - LID_LEDGE - EPS],
+                    [x0 + EPS, zt - t - LID_RAIL - EPS],
                 ]);
-            // front ledge on the strip's back face (gap for the latch tab)
-            difference() {
-                translate([0, yc0 - EPS, 0]) rotate([90, 0, 90])
-                    linear_extrude(inner.x + 2 * EPS, center=true)
-                    polygon([[0, zt - t], [LID_LEDGE, zt - t],
-                             [LID_LEDGE, zt - t - LID_LEDGE],
-                             [0, zt - t - 2 * LID_LEDGE]]);
-                translate([lb_tab_x(id) - TAB_W / 2 - 1, yc0 - 1, zt - t - 5])
-                    cube([TAB_W + 2, LID_LEDGE + 2, 6]);
-            }
             // dividers, up to the underside of the lid
             for (i = [1:1:nc-1])
-                difference() {
-                    translate([lb_cx0(id, i) - 0.6, yc0 - EPS, zf])
-                        cube([1.2, yi1 - yc0 + 2 * EPS, zt - t - zf]);
-                    // clearance for the latch tab
-                    translate([lb_tab_x(id) - TAB_W / 2 - 0.5, yc0 - 1,
-                               zt - t - TAB_H - 0.5])
-                        cube([TAB_W + 1, LID_C + TAB_T + 1.5, TAB_H + 1]);
-                }
-            // scoop against the strip, so cells slide out to the front
-            r = P(id, "scoop_r");
+                translate([lb_cx0(id, i) - 0.6, yc0 - EPS, zf])
+                    cube([1.2, yi1 - yc0 + 2 * EPS, zt - t - zf]);
+            // scoop: concave quarter round, tangent to the floor and to
+            // the strip face at the underside of the lid
             translate([0, yc0 - EPS, zf]) rotate([90, 0, 90])
                 linear_extrude(inner.x + 2 * EPS, center=true)
                 difference() {
                     square([r, r]);
-                    translate([r, r]) circle(r=r, $fn=64);
+                    translate([r, r]) circle(r=r, $fn=96);
                 }
         }
 
+        // rebate along the back of the strip: the lid's front edge sits here
+        translate([-x0 - 1, yc0 - REBATE, zt - t])
+            cube([inner.x + 2, REBATE + 1, t + 1]);
         // hinge keyholes in both rails, plus a relief slit in front of
         // each so the jaw can spring open as the pin snaps through
         for (m = [0, 1]) mirror([m, 0, 0])
@@ -498,15 +497,14 @@ module lidbox_body(id) {
                     translate([0, ax[0] - PIN_THROAT / 2 - 0.4, zt + 0.5])
                         cube([d, PIN_THROAT + 0.8, EPS]);
                 }
-                // relief slit
                 translate([0, ax[0] - PIN_THROAT / 2 - 1.2 - 0.6, ax[1] - PIN_HOLE_D / 2])
                     cube([d, 0.6, zt - ax[1] + PIN_HOLE_D / 2 + 1]);
             }
-        // latch groove in the strip's back face
-        translate([lb_tab_x(id) - TAB_W / 2 - 0.5, yc0 - 0.6, lb_latch_z(id) - 0.8])
-            cube([TAB_W + 1, 0.6 + EPS, 1.6]);
-        // finger dip over the latch
-        translate([lb_notch_x(id), yc0 - 1, zt + 3]) sphere(r=6, $fn=48);
+        // detent dimples in the rails
+        for (m = [0, 1]) mirror([m, 0, 0])
+            translate(lb_det_pos(id)) sphere(r=DET_R + 0.1, $fn=24);
+        // finger dip in front of the pull tab; dips just below the lid
+        translate([lb_notch_x(id), yc0 - REBATE - 1, zt + 2.5]) sphere(r=6, $fn=48);
     }
 }
 
@@ -514,11 +512,12 @@ module lidbox_body(id) {
 module lidbox_lid_closed(id) {
     t = lb_t(id);
     zt = lb_top(id);
-    yf = lb_yc0(id) + LID_C;          // front edge
+    yf = lb_lid_yf(id);
     ax = lb_axis(id);
     hw = lb_lid_hw(id);
     af = P(id, "mesh");               // hex hole across flats
     pitch = af + P(id, "mesh_wall");
+    y_mesh0 = lb_yc0(id) + 1.5;       // mesh starts clear of the rebate
 
     difference() {
         union() {
@@ -530,23 +529,31 @@ module lidbox_lid_closed(id) {
             for (m = [0, 1]) mirror([m, 0, 0])
                 translate([hw - EPS, ax[0], ax[1]]) rotate([0, 90, 0])
                     cylinder(d=PIN_D, h=PIN_LEN + EPS, $fn=24);
-            // latch tab + bump
-            translate([lb_tab_x(id) - TAB_W / 2, yf, zt - t - TAB_H])
-                cube([TAB_W, TAB_T, TAB_H + EPS]);
-            translate([lb_tab_x(id) - TAB_W / 2, yf, lb_latch_z(id)])
-                rotate([0, 90, 0]) linear_extrude(TAB_W)
-                polygon([[-0.6, 0], [0, -BUMP], [0.6, 0]]);
+            // detent bumps
+            for (m = [0, 1]) mirror([m, 0, 0])
+                intersection() {
+                    translate(lb_det_pos(id)) sphere(r=DET_R, $fn=24);
+                    translate([hw - EPS, yf, zt - t]) cube([2, ax[0] - yf, t]);
+                }
+            // pull tab, standing up at the front edge
+            translate([lb_tab_x(id) - TAB_W / 2, yf, zt - EPS])
+                hull() {
+                    cube([TAB_W, TAB_T, EPS]);
+                    translate([0.8, 0, TAB_H - 0.8]) rotate([-90, 0, 0])
+                        cylinder(r=0.8, h=TAB_T, $fn=16);
+                    translate([TAB_W - 0.8, 0, TAB_H - 0.8]) rotate([-90, 0, 0])
+                        cylinder(r=0.8, h=TAB_T, $fn=16);
+                }
         }
-        // hex mesh, inside a solid border
+        // hex mesh, inside a solid border. Explicit union(): with
+        // --enable=lazy-union (used for the 3MF) a bare for() would hand
+        // intersection() 2,500 separate children and the holes would vanish.
         intersection() {
-            translate([-hw + 2.5, yf + 3.5, zt - t - 1])
-                cube([2 * hw - 5, ax[0] - t / 2 - 2 - yf - 3.5, t + 2]);
-            // explicit union(): with --enable=lazy-union (used for the
-            // 3MF) a bare for() would hand intersection() 2,500 separate
-            // children, and the holes would vanish
+            translate([-hw + 2.5, y_mesh0, zt - t - 1])
+                cube([2 * hw - 5, ax[0] - t / 2 - 2 - y_mesh0, t + 2]);
             union() for (j = [0:40], i = [-30:30])
                 translate([i * pitch + (j % 2) * pitch / 2,
-                           yf + 3.5 + j * pitch * sqrt(3) / 2,
+                           y_mesh0 + j * pitch * sqrt(3) / 2,
                            zt - t - 1])
                     rotate([0, 0, 30])
                     cylinder(r=af / sqrt(3), h=t + 2, $fn=6);
@@ -554,16 +561,16 @@ module lidbox_lid_closed(id) {
     }
 }
 
-// The lid as printed: upside down, beside the box.
+// The lid as printed: right side up (flat bottom on the bed), beside the box.
 module lidbox_lid_print(id) {
-    translate([0, -outer_size(id).y - 6, lb_top(id)])
-        rotate([180, 0, 0]) lidbox_lid_closed(id);
+    translate([0, -outer_size(id).y - 6 - lb_axis(id)[0], -(lb_top(id) - lb_t(id))])
+        lidbox_lid_closed(id);
 }
 
 module lidbox_text(id, font) {
     inner = inner_size(id);
     strip = P(id, "strip");
-    yc = -inner.y / 2 + strip / 2;
+    yc = -inner.y / 2 + (strip - REBATE) / 2;
     comps = lb_comps(id);
     nc = len(comps);
     ms = P(id, "text_size");

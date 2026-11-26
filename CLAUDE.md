@@ -84,17 +84,24 @@ across per row within its group). A hollow label strip at the front has a
 front, 10 mm label ledge at the back with a 45° underside, and a
 hand-drawn battery+bolt icon (`icon_recharge`).
 **lidbox bins** (`type: "lidbox"`): compartments (`compartments` =
-`[[label, width weight], ...]`) with a scoop against a solid 8 mm label
-strip, dividers up to the lid, and side rails with a ledge. The lid is
-inset and flush with the rim (3.2 mm thick, 3 mm hex mesh, 1 mm walls).
-It has a rounded back edge, and two Ø2 side pins that snap down through
-1.8 mm keyhole throats in the rails (each jaw has a relief slit). That
-makes a lift-off hinge that opens to vertical. The front latch is a
-1.2 mm sprung tab with a 0.45 mm bump that clicks into a groove in the
-strip, under a finger dip at the first divider (or the right end).
-Dividers are notched for the tab. Checked in OpenSCAD: no lid/box overlap
-when closed, and the lid swings clear at 30/60/90°. The lid is a separate
-white part, printed upside down (`-lid.stl`, the third object in the 3MF).
+`[[label, width weight], ...]`) behind a solid 8 mm label strip. The
+**scoop rises the full inside depth** (r = `depth`, 15), tangent to the
+floor and to the strip face at the lid's underside. **No ledges or lips
+around the inside** (2026-11-26: Steve found the old ledge caught cells
+being scooped out). The lid's front edge rests in a 2 mm **rebate** along
+the back of the strip. Side rails have a 45° underside, and dividers rise
+to the lid. The lid is inset and flush with the rim (3.2 mm, 3 mm hex
+mesh, 1 mm walls), with a rounded back edge and two Ø2 side pins that
+snap down through 1.8 mm keyhole throats (each jaw has a relief slit), so
+the hinge lifts off and opens to vertical. A **pull tab stands up** at the
+front edge (16 × 1.6 × 3 mm), over the finger dip at the first divider (or
+the right end). Steve found the old tuck-in latch tab worked better as a
+pull tab and blocked the finger hole. Holding it shut: two **side detent
+bumps** (r 0.8, 0.5 proud, 0.25 interference) click into dimples in the
+rails. Checked in OpenSCAD: closed, there's no overlap. Opening, only the
+detents touch (≈0.2 mm³ at 1.5–3°), then it's clear at 10/30/60/90°. The
+lid is a separate white part printed **right side up** (`-lid.stl`, third
+3MF object), 6.2 mm tall, so the box text is still the last thing printed.
 Previews include `<id>-closed.png`.
 No stacking lip: the cells stick up, so nothing can stack anyway.
 
@@ -159,15 +166,16 @@ Medium, Condensed Medium, Condensed ExtraBold. Override for one build with
 | `coin` | 2x1 lidbox | CR2032 \| CR2016 compartments | 15 mm deep, hex-mesh snap lid. Replaces the slot design |
 | `button` | 2x1 lidbox | AG13/LR44 (⅔) \| AG3 (⅓) | same. Replaces the slot design |
 | `weirdos` | 2x1 lidbox | one compartment | odd loose cells |
-| `recharge` | 2x2 | loose | scoop tray, "Recharge" + icon |
+| `recharge` | 2x2 | loose | scoop tray, "Recharge" + icon; scoop r 22 (was 16) |
 
 ## Next steps
 
-1. Lidboxes (`coin`, `button`, `weirdos`): Steve built `weirdos`; the 3MF
-   lid had no mesh (lazy-union bug, fixed 2026-11-25). Next: he re-renders,
-   prints `weirdos`, and reports on the hinge snap (PIN_THROAT), latch
-   (BUMP / groove), finger dip and mesh visibility. Tune, then print
-   `coin` + `button`.
+1. Lidboxes (`coin`, `button`, `weirdos`): Steve printed `weirdos` and
+   `coin` (lid mesh OK after the lazy-union fix). 2026-11-26 fixes: pull
+   tab up (was a latch tab under the lid), side detents instead, no inside
+   ledges, full-depth scoop, rebate front support, bigger Recharge scoop.
+   Next: reprint one and tune DET_OUT (detent click) and PIN_THROAT if
+   needed.
 2. `aa` ×2 + `aaa`: ready to print (raised rows, 0.8 tubes). Then 9V,
    NP-BX1, Recharge. Get feedback on pinch grip and tube stiffness.
 3. Steve commits a Bambu project 3MF per bin under `bambu/`.

@@ -119,20 +119,20 @@ BINS = [
     // loose: cells rolled around.) Hex-mesh lid shows what's inside.
     ["coin", [
         ["type", "lidbox"], ["grid", [2, 1]], ["strip", 8],
-        ["scoop_r", 8], ["text_size", 4.5],
+        ["text_size", 4.5],
         ["compartments", [["CR2032", 1], ["CR2016", 1]]],
     ]],
 
     ["button", [
         ["type", "lidbox"], ["grid", [2, 1]], ["strip", 8],
-        ["scoop_r", 8], ["text_size", 4.5],
+        ["text_size", 4.5],
         ["compartments", [["AG13 / LR44", 2], ["AG3", 1]]],
     ]],
 
     // Odd loose cells with no bin of their own.
     ["weirdos", [
         ["type", "lidbox"], ["grid", [2, 1]], ["strip", 8],
-        ["scoop_r", 8], ["text_size", 5.5],
+        ["text_size", 5.5],
         ["compartments", [["Weirdos", 1]]],
     ]],
 
@@ -141,7 +141,7 @@ BINS = [
     ["recharge", [
         ["type", "scoop"], ["grid", [2, 2]],
         ["height", 33.4],          // total height, matches the AA bin
-        ["scoop_r", 16],
+        ["scoop_r", 22],           // big, gentle scoop (open depth 25)
         ["ledge", 10],             // label ledge depth at the back
         ["label", "Recharge"], ["icon", "recharge"],
         ["text_size", 6],
