@@ -131,18 +131,23 @@ Medium, Condensed Medium, Condensed ExtraBold. Override for one build with
   `/usr/local/bin/openscad` that runs
   `docker run --rm -v /home/user:/home/user -w "$PWD" openscad/openscad:dev openscad "$@"`.
 - Previews: `./build.py` (PNG via `--render`, colors honored).
-- 3MF: `--enable=lazy-union` gives separate objects (body white, text
-  black, lid). **Gotcha:** lazy-union also stops `for()` from unioning
+- `--enable=lazy-union` is no longer used for 3MFs (see below), but keep
+  the gotcha in mind for any lazy-union export. **Gotcha:** lazy-union also stops `for()` from unioning
   its children, so `intersection() { A; for (...) ... }` intersects
   every iteration and comes out empty. Always wrap such loops in an
   explicit `union()`. This bit the lid mesh (2026-11-25): the 3MF lid
   was solid while the STL was fine. Check by comparing per-object
   volumes in the 3MF vs the STLs (trimesh).
-- 3MFs are exported with `-O export-3mf/color-mode=none` (2026-11-26).
-  OpenSCAD otherwise writes a color on every triangle, which Bambu Studio
-  imports as color painting. Painting overrides the object's filament, so
-  a second imported 3MF couldn't be recolored. Steve assigns filaments in
-  Bambu: per bin, object 1 = body, 2 = text, 3 = lid (lidboxes).
+- **3MFs are written by `build.py` itself in Bambu Studio's own layout**
+  (2026-11-26), modelled on Steve's saved `bambu/aa_fit.3mf`. Each bin is
+  ONE object with parts `body` (filament `BODY_FILAMENT`, default 1) and
+  `text` (`TEXT_FILAMENT`, default 2), set per part in
+  `Metadata/model_settings.config`; lidboxes add a second object, the
+  lid. Why: OpenSCAD's 3MF puts a color on every triangle, which Bambu
+  imports as color *painting*, which overrides filament changes. Steve
+  couldn't recolor a second imported model. No per-triangle colors now.
+  Override: `TEXT_FILAMENT=6 ./build.py`. Checked: each part's mesh
+  matches its STL and is watertight. **Not yet confirmed in Bambu Studio.**
 
 ## Status (2026-11-24)
 
